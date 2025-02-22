@@ -1,6 +1,5 @@
 'use client'
 
-import { signIn } from "next-auth/react";
 import { useState, useEffect } from 'react';
 import { Gamepad } from 'lucide-react';
 import Link from 'next/link';
@@ -14,7 +13,7 @@ export default function SignInPage() {
   };
 
   const handleGoogleSignIn = () => {
-    signIn("google", { callbackUrl: "/dashboard" }); // Use NextAuth's signIn
+    window.location.href = '/api/auth/google';
   };
 
   // Check URL parameters for errors on mount
