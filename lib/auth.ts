@@ -10,6 +10,15 @@ export interface UserSession {
   email: string;
   name: string | null;
   image: string | null;
+  [key: string]: string | null;
+}
+
+interface JWTPayload {
+  [key: string]: unknown;
+  id?: string;
+  email?: string;
+  name?: string | null;
+  image?: string | null;
 }
 
 export async function getUserSession(): Promise<UserSession | null> {
@@ -19,14 +28,22 @@ export async function getUserSession(): Promise<UserSession | null> {
     if (!token) return null;
 
     const verified = await jwtVerify(token, JWT_SECRET);
-    const payload = verified.payload;
+    const payload = verified.payload as JWTPayload;
 
-    if (!isUserSessionPayload(payload)) {
+    if (!isValidSession(payload)) {
       console.error('Invalid session payload:', payload);
       return null;
     }
 
-    return payload as UserSession;
+    // Create a new session object with default values for optional fields
+    const session: UserSession = {
+      id: payload.id,
+      email: payload.email,
+      name: payload.name ?? null,
+      image: payload.image ?? null
+    };
+
+    return session;
   } catch (error) {
     console.error('Error verifying session:', error);
     return null;
@@ -55,7 +72,7 @@ export async function createSession(user: UserSession) {
   return token;
 }
 
-function isUserSessionPayload(payload: any): payload is UserSession {
+function isValidSession(payload: JWTPayload): payload is JWTPayload & Required<Pick<JWTPayload, 'id' | 'email'>> {
   return (
     typeof payload === 'object' &&
     payload !== null &&
