@@ -21,7 +21,21 @@ jobs:
       - name: Save Docker image
         run: docker save -o playstudy-ai.tar playstudy-ai
 
-      - name: Deploy to EC2
+      - name: Transfer Docker image to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "File transfer starting..."
+          # Use scp to transfer the file
+        env:
+          TRANSFER_FILE: playstudy-ai.tar
+        run: |
+          scp -i <(echo "${{ secrets.EC2_SSH_KEY }}") $TRANSFER_FILE ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/
+
+      - name: Deploy Docker image on EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -30,9 +44,5 @@ jobs:
           script: |
             docker stop playstudy-ai || true
             docker rm playstudy-ai || true
-            docker load -i playstudy-ai.tar
+            docker load -i /home/${{ secrets.EC2_USERNAME }}/playstudy-ai.tar
             docker run -d --name playstudy-ai -p 3000:3000 playstudy-ai
-        env:
-          TRANSFER_FILE: playstudy-ai.tar
-        pre_script: |
-          scp -i ${{ secrets.EC2_SSH_KEY }} $TRANSFER_FILE ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/
