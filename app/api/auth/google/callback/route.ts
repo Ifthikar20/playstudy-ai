@@ -78,12 +78,11 @@ export async function GET(request: Request) {
     });
 
     // ✅ Redirect to dashboard based on environment
-    const redirectUrl =
-      process.env.NODE_ENV === "production"
-        ? process.env.NEXTAUTH_URL + "/dashboard"
-        : "http://localhost:3000/dashboard";
-
-    return NextResponse.redirect(new URL(redirectUrl));
+    const baseUrl = process.env.NODE_ENV === "production"
+    ? (process.env.NEXTAUTH_URL || "https://playstudy.ai")
+    : "http://localhost:3000";
+  const redirectUrl = `${baseUrl}/dashboard`;
+  return NextResponse.redirect(new URL(redirectUrl));
   } catch (error) {
     console.error("OAuth callback error:", error);
     return NextResponse.redirect(

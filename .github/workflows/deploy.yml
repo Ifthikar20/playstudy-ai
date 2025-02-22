@@ -1,67 +1,31 @@
-name: Deploy to EC2
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build Docker image
-        run: |
-          echo "Building Docker image..."
-          docker build -t playstudy-ai .
-
-      - name: Save Docker image
-        run: |
-          echo "Saving Docker image..."
-          docker save -o playstudy-ai.tar playstudy-ai
-
-      - name: Transfer Docker image to EC2
-        run: |
-          echo "Starting file transfer to EC2..."
-          echo -e "${{ secrets.EC2_SSH_KEY }}" > key.pem
-          chmod 400 key.pem
-          scp -o StrictHostKeyChecking=no -i key.pem playstudy-ai.tar ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/
-          echo "File transferred successfully."
-          rm key.pem
-
-      - name: Deploy Docker image on EC2
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            echo "Starting deployment on EC2..."
-            docker --version || { echo "Docker not installed or running on EC2"; exit 1; }
-            docker stop playstudy-ai || true
-            docker rm playstudy-ai || true
-            if [ -f /home/${{ secrets.EC2_USERNAME }}/playstudy-ai.tar ]; then
-              echo "File exists, loading Docker image..."
-              docker load -i /home/${{ secrets.EC2_USERNAME }}/playstudy-ai.tar
-              docker run -d --name playstudy-ai \
-                -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
-                -e AUTH_GOOGLE_ID="${{ secrets.AUTH_GOOGLE_ID }}" \
-                -e AUTH_GOOGLE_SECRET="${{ secrets.AUTH_GOOGLE_SECRET }}" \
-                -e NEXTAUTH_URL="${{ secrets.NEXTAUTH_URL }}" \
-                -e NEXTAUTH_SECRET="${{ secrets.NEXTAUTH_SECRET }}" \
-                -e REDIRECT_URI="${{ secrets.PROD_REDIRECT_URI }}" \
-                -p 3000:3000 \
-                playstudy-ai
-              echo "Cleaning up old images..."
-              docker system prune -f
-              echo "Deployment completed."
-            else
-              echo "Error: playstudy-ai.tar not found on EC2!"
-              ls -la /home/${{ secrets.EC2_USERNAME }}/
-              exit 1
-            fi
+- name: Deploy Docker image on EC2
+  uses: appleboy/ssh-action@v1.0.0
+  with:
+    host: ${{ secrets.EC2_HOST }}
+    username: ${{ secrets.EC2_USERNAME }}
+    key: ${{ secrets.EC2_SSH_KEY }}
+    script: |
+      echo "Starting deployment on EC2..."
+      docker --version || { echo "Docker not installed or running on EC2"; exit 1; }
+      docker stop playstudy-ai || true
+      docker rm playstudy-ai || true
+      if [ -f /home/${{ secrets.EC2_USERNAME }}/playstudy-ai.tar ]; then
+        echo "File exists, loading Docker image..."
+        docker load -i /home/${{ secrets.EC2_USERNAME }}/playstudy-ai.tar
+        docker run -d --name playstudy-ai \
+          -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+          -e AUTH_GOOGLE_ID="${{ secrets.AUTH_GOOGLE_ID }}" \
+          -e AUTH_GOOGLE_SECRET="${{ secrets.AUTH_GOOGLE_SECRET }}" \
+          -e NEXTAUTH_URL="${{ secrets.NEXTAUTH_URL }}" \
+          -e NEXTAUTH_SECRET="${{ secrets.NEXTAUTH_SECRET }}" \
+          -e PROD_REDIRECT_URI="${{ secrets.PROD_REDIRECT_URI }}" \  # Changed from REDIRECT_URI to PROD_REDIRECT_URI
+          -p 3000:3000 \
+          playstudy-ai
+        echo "Cleaning up old images..."
+        docker system prune -f
+        echo "Deployment completed."
+      else
+        echo "Error: playstudy-ai.tar not found on EC2!"
+        ls -la /home/${{ secrets.EC2_USERNAME }}/
+        exit 1
+      fi
