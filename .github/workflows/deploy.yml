@@ -22,18 +22,17 @@ jobs:
         run: docker save -o playstudy-ai.tar playstudy-ai
 
       - name: Transfer Docker image to EC2
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            echo "File transfer starting..."
-          # Use scp to transfer the file
-        env:
-          TRANSFER_FILE: playstudy-ai.tar
         run: |
-          scp -i <(echo "${{ secrets.EC2_SSH_KEY }}") $TRANSFER_FILE ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/
+          echo "Starting file transfer to EC2..."
+          # Write SSH key to a file
+          echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+          # Set correct permissions
+          chmod 400 key.pem
+          # Transfer the file with debugging
+          scp -o StrictHostKeyChecking=no -i key.pem playstudy-ai.tar ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/ || { echo "SCP failed"; exit 1; }
+          echo "File transferred successfully."
+          # Clean up
+          rm key.pem
 
       - name: Deploy Docker image on EC2
         uses: appleboy/ssh-action@v1.0.0
@@ -42,7 +41,15 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            echo "Starting deployment on EC2..."
             docker stop playstudy-ai || true
             docker rm playstudy-ai || true
-            docker load -i /home/${{ secrets.EC2_USERNAME }}/playstudy-ai.tar
-            docker run -d --name playstudy-ai -p 3000:3000 playstudy-ai
+            if [ -f /home/${{ secrets.EC2_USERNAME }}/playstudy-ai.tar ]; then
+              echo "File exists, loading Docker image..."
+              docker load -i /home/${{ secrets.EC2_USERNAME }}/playstudy-ai.tar
+              docker run -d --name playstudy-ai -p 3000:3000 playstudy-ai
+              echo "Deployment completed."
+            else
+              echo "Error: playstudy-ai.tar not found on EC2!"
+              exit 1
+            fi
