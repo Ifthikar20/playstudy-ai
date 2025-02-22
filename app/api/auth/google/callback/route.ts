@@ -3,7 +3,12 @@ import { createSession } from "@/lib/auth";
 
 const CLIENT_ID = process.env.AUTH_GOOGLE_ID!;
 const CLIENT_SECRET = process.env.AUTH_GOOGLE_SECRET!;
-const REDIRECT_URI = process.env.REDIRECT_URI || "http://localhost:3000/api/auth/google/callback";
+
+// ✅ Use environment logic for REDIRECT_URI
+const REDIRECT_URI =
+  process.env.NODE_ENV === "production"
+    ? process.env.PROD_REDIRECT_URI || "https://playstudy.ai/api/auth/google/callback"
+    : "http://localhost:3000/api/auth/google/callback";
 
 interface GoogleTokenResponse {
   access_token: string;
@@ -42,7 +47,7 @@ export async function GET(request: Request) {
         code,
         client_id: CLIENT_ID,
         client_secret: CLIENT_SECRET,
-        redirect_uri: REDIRECT_URI,
+        redirect_uri: REDIRECT_URI, // ✅ Uses correct environment-based URI
         grant_type: "authorization_code",
       }),
     });
@@ -72,11 +77,22 @@ export async function GET(request: Request) {
       image: userData.picture ?? null,
     });
 
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    // ✅ Redirect to dashboard based on environment
+    const redirectUrl =
+      process.env.NODE_ENV === "production"
+        ? process.env.NEXTAUTH_URL + "/dashboard"
+        : "http://localhost:3000/dashboard";
+
+    return NextResponse.redirect(new URL(redirectUrl));
   } catch (error) {
     console.error("OAuth callback error:", error);
     return NextResponse.redirect(
-      new URL(`/signin?error=auth_error&message=${encodeURIComponent(error instanceof Error ? error.message : "Unknown error")}`, request.url)
+      new URL(
+        `/signin?error=auth_error&message=${encodeURIComponent(
+          error instanceof Error ? error.message : "Unknown error"
+        )}`,
+        request.url
+      )
     );
   }
 }

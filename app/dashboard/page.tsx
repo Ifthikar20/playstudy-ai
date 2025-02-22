@@ -35,15 +35,24 @@ export default function Dashboard() {
 
   const handleSignOut = async () => {
     try {
-      await fetch('/api/auth/signout', {
-        method: 'POST',
+      const response = await fetch("/api/auth/signout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
-      router.push('/');
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Signout failed");
+      }
+  
+      const { redirectUrl } = await response.json();
+      window.location.href = redirectUrl; // ✅ Redirect client manually to avoid CORS issues
     } catch (error) {
-      console.error('Sign out failed:', error);
+      console.error("Sign out failed:", error);
     }
   };
-
+  
+  
   if (!user) {
     return <div>Loading...</div>;
   }
