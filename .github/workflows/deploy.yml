@@ -16,20 +16,27 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build Docker image
-        run: docker build -t playstudy-ai .
+        run: |
+          echo "Building Docker image..."
+          docker build -t playstudy-ai .
 
       - name: Save Docker image
-        run: docker save -o playstudy-ai.tar playstudy-ai
+        run: |
+          echo "Saving Docker image..."
+          docker save -o playstudy-ai.tar playstudy-ai
 
       - name: Transfer Docker image to EC2
         run: |
           echo "Starting file transfer to EC2..."
-          # Write SSH key to a file
-          echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+          # Write SSH key to a file and ensure proper formatting
+          echo -e "${{ secrets.EC2_SSH_KEY }}" > key.pem
           # Set correct permissions
           chmod 400 key.pem
+          # Debug: Show the first few lines of the key file
+          echo "SSH key content (first 2 lines):"
+          head -n 2 key.pem
           # Transfer the file with debugging
-          scp -o StrictHostKeyChecking=no -i key.pem playstudy-ai.tar ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/ || { echo "SCP failed"; exit 1; }
+          scp -o StrictHostKeyChecking=no -i key.pem playstudy-ai.tar ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USERNAME }}/ || { echo "SCP failed: $?"; cat key.pem; exit 1; }
           echo "File transferred successfully."
           # Clean up
           rm key.pem
@@ -42,6 +49,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             echo "Starting deployment on EC2..."
+            docker --version || { echo "Docker not installed or running on EC2"; exit 1; }
             docker stop playstudy-ai || true
             docker rm playstudy-ai || true
             if [ -f /home/${{ secrets.EC2_USERNAME }}/playstudy-ai.tar ]; then
@@ -51,5 +59,6 @@ jobs:
               echo "Deployment completed."
             else
               echo "Error: playstudy-ai.tar not found on EC2!"
+              ls -la /home/${{ secrets.EC2_USERNAME }}/
               exit 1
             fi
