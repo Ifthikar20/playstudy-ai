@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Brain, Gamepad, Book } from "lucide-react";
+import HangmanGame from "./_components/Games/HangmanGame";
 
 interface User {
   name: string | null;
@@ -54,7 +55,9 @@ export default function Dashboard() {
         <div className="card-hover p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-3">
             <Brain className="h-6 w-6 text-purple-500" />
-            <h2 className="text-lg sm:text-xl font-semibold text-[var(--foreground)]">Active Learning</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--foreground)]">
+              Active Learning
+            </h2>
           </div>
           <p className="text-gray-400 text-sm sm:text-base">
             Engage with interactive quizzes and games to boost retention.
@@ -63,7 +66,9 @@ export default function Dashboard() {
         <div className="card-hover p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-3">
             <Gamepad className="h-6 w-6 text-purple-500" />
-            <h2 className="text-lg sm:text-xl font-semibold text-[var(--foreground)]">Game-Based Learning</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--foreground)]">
+              Game-Based Learning
+            </h2>
           </div>
           <p className="text-gray-400 text-sm sm:text-base">
             Turn subjects into fun, AI-powered games.
@@ -72,13 +77,19 @@ export default function Dashboard() {
         <div className="card-hover p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-3">
             <Book className="h-6 w-6 text-purple-500" />
-            <h2 className="text-lg sm:text-xl font-semibold text-[var(--foreground)]">Note Transformation</h2>
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--foreground)]">
+              Note Transformation
+            </h2>
           </div>
           <p className="text-gray-400 text-sm sm:text-base">
             Convert your notes into interactive experiences.
           </p>
         </div>
       </div>
+
+      {/* Hangman Game Component */}
+      <HangmanGame />
+
       <div className="mt-6 text-center">
         <button
           onClick={handleSignOut}
