@@ -1,40 +1,35 @@
-# Build stage
+# 🔹 STAGE 1: Build
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install
+# ✅ Install dependencies efficiently (skip unnecessary scripts)
+COPY package.json package-lock.json ./
+RUN npm ci --production --ignore-scripts
 
-# Copy application code
+# ✅ Copy the rest of the application
 COPY . .
 
-# Copy .env file if it exists (optional for build-time vars)
-COPY .env* ./
-
-# Build the Next.js application
+# ✅ Build the Next.js application
 RUN npm run build
 
-# Production stage
+# 🔹 STAGE 2: Production (Final lightweight image)
 FROM node:18-alpine AS runner
 WORKDIR /app
 
-# Set production environment
+# ✅ Set production environment
 ENV NODE_ENV=production
 
-# Copy necessary files from builder
+# ✅ Copy only necessary files
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/node_modules ./node_modules
 
-# Install only production dependencies
-RUN npm install --production --ignore-scripts
+# ✅ Remove unnecessary files (optional)
+RUN rm -rf /app/test /app/docs
 
-# Optional: Copy .env for local testing, but prefer runtime injection in prod
-# COPY --from=builder /app/.env* ./
-
-# Expose port
+# ✅ Expose the correct port
 EXPOSE 3000
 
-# Start the application
+# ✅ Start the application
 CMD ["npm", "start"]
