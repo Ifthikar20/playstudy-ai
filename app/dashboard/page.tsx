@@ -1,7 +1,9 @@
-'use client';
+// app/dashboard/page.tsx
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Brain, Gamepad, Book } from "lucide-react";
 
 interface User {
   name: string | null;
@@ -16,20 +18,18 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchSession() {
       try {
-        const response = await fetch('/api/auth/session');
+        const response = await fetch("/api/auth/session");
         const data = await response.json();
-        
         if (data.user) {
           setUser(data.user);
         } else {
-          router.push('/signin');
+          router.push("/signin");
         }
       } catch (error) {
-        console.error('Failed to fetch session:', error);
-        router.push('/signin');
+        console.error("Failed to fetch session:", error);
+        router.push("/signin");
       }
     }
-
     fetchSession();
   }, [router]);
 
@@ -39,43 +39,53 @@ export default function Dashboard() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Signout failed");
-      }
-  
       const { redirectUrl } = await response.json();
-      window.location.href = redirectUrl; // ✅ Redirect client manually to avoid CORS issues
+      window.location.href = redirectUrl;
     } catch (error) {
       console.error("Sign out failed:", error);
     }
   };
-  
-  
-  if (!user) {
-    return <div>Loading...</div>;
-  }
+
+  if (!user) return <div className="text-center p-8">Loading...</div>;
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white">
-      <div className="max-w-4xl w-full px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">
-          Welcome, {user.name || 'User'}! 👋
-        </h1>
-        <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
-          <p className="text-gray-300 mb-4">
-            You are signed in as: {user.email}
+    <div className="max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="card-hover p-4 sm:p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <Brain className="h-6 w-6 text-purple-500" />
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--foreground)]">Active Learning</h2>
+          </div>
+          <p className="text-gray-400 text-sm sm:text-base">
+            Engage with interactive quizzes and games to boost retention.
           </p>
-          {/* Sign Out Button */}
-          <button
-            onClick={handleSignOut}
-            className="px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Sign Out
-          </button>
-          {/* Add your dashboard content here */}
         </div>
+        <div className="card-hover p-4 sm:p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <Gamepad className="h-6 w-6 text-purple-500" />
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--foreground)]">Game-Based Learning</h2>
+          </div>
+          <p className="text-gray-400 text-sm sm:text-base">
+            Turn subjects into fun, AI-powered games.
+          </p>
+        </div>
+        <div className="card-hover p-4 sm:p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <Book className="h-6 w-6 text-purple-500" />
+            <h2 className="text-lg sm:text-xl font-semibold text-[var(--foreground)]">Note Transformation</h2>
+          </div>
+          <p className="text-gray-400 text-sm sm:text-base">
+            Convert your notes into interactive experiences.
+          </p>
+        </div>
+      </div>
+      <div className="mt-6 text-center">
+        <button
+          onClick={handleSignOut}
+          className="btn-primary text-sm sm:text-base"
+        >
+          Sign Out
+        </button>
       </div>
     </div>
   );
