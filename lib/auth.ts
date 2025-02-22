@@ -71,7 +71,6 @@ export async function createSession(user: UserSession) {
 
   return token;
 }
-
 function isValidSession(payload: JWTPayload): payload is JWTPayload & Required<Pick<JWTPayload, 'id' | 'email'>> {
   return (
     typeof payload === 'object' &&

@@ -33,6 +33,17 @@ export default function Dashboard() {
     fetchSession();
   }, [router]);
 
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth/signout', {
+        method: 'POST',
+      });
+      router.push('/');
+    } catch (error) {
+      console.error('Sign out failed:', error);
+    }
+  };
+
   if (!user) {
     return <div>Loading...</div>;
   }
@@ -47,6 +58,13 @@ export default function Dashboard() {
           <p className="text-gray-300 mb-4">
             You are signed in as: {user.email}
           </p>
+          {/* Sign Out Button */}
+          <button
+            onClick={handleSignOut}
+            className="px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Sign Out
+          </button>
           {/* Add your dashboard content here */}
         </div>
       </div>
