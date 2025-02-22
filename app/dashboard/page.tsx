@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Brain, Gamepad, Book } from "lucide-react";
 import HangmanGame from "./_components/Games/HangmanGame";
+import MillionaireGame from "./_components/Games/MillionaireGame";
+
 
 interface User {
   name: string | null;
@@ -89,7 +91,7 @@ export default function Dashboard() {
 
       {/* Hangman Game Component */}
       <HangmanGame />
-
+      <MillionaireGame />
       <div className="mt-6 text-center">
         <button
           onClick={handleSignOut}
