@@ -4,13 +4,10 @@ WORKDIR /app
 
 # Copy package files and install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 # Copy application code
 COPY . .
-
-# Copy .env file if it exists (optional for build-time vars)
-COPY .env* ./
 
 # Build the Next.js application
 RUN npm run build
@@ -24,15 +21,10 @@ ENV NODE_ENV=production
 
 # Copy necessary files from builder
 COPY --from=builder /app/.next ./.next
-# COPY --from=builder /app/public ./public
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/package-lock.json ./package-lock.json
-
-# Install only production dependencies
-RUN npm install --production --ignore-scripts
-
-# Optional: Copy .env for local testing, but prefer runtime injection in prod
-# COPY --from=builder /app/.env* ./
+COPY --from=builder /app/node_modules ./node_modules
+# Uncomment if you have a public directory
+# COPY --from=builder /app/public ./public
 
 # Expose port
 EXPOSE 3000
