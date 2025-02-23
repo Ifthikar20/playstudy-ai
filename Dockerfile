@@ -23,7 +23,7 @@ ENV NODE_ENV=production
 
 # ✅ Copy only necessary files
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+COPY --from=builder ./public
 COPY --from=builder /app/package.json ./package.json
 
 # ✅ Install only production dependencies (from lock file)
