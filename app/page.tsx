@@ -106,7 +106,7 @@ export default function Page() {
             </p>
             <Link href="/signin">
               <button className="px-6 sm:px-8 py-3 sm:py-4 bg-purple-600 rounded-xl text-base sm:text-lg font-semibold hover:bg-purple-700 transition-all transform hover:scale-105 flex items-center mx-auto">
-                Start Learning Through Play
+                  start Playing/Studying
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </button>
             </Link>
