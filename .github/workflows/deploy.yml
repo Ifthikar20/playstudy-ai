@@ -54,7 +54,11 @@ jobs:
                 -e AUTH_GOOGLE_SECRET="${{ secrets.AUTH_GOOGLE_SECRET }}" \
                 -e NEXTAUTH_URL="${{ secrets.NEXTAUTH_URL }}" \
                 -e NEXTAUTH_SECRET="${{ secrets.NEXTAUTH_SECRET }}" \
-                -e REDIRECT_URI="${{ secrets.PROD_REDIRECT_URI }}" \
+                -e PROD_REDIRECT_URI="${{ secrets.PROD_REDIRECT_URI }}" \
+                -e NODE_ENV="${{ secrets.NODE_ENV }}" \
+                -e DEEPSEEK_API_KEY="${{ secrets.DEEPSEEK_API_KEY }}" \
+                -e DEEPSEEK_API_URL="${{ secrets.DEEPSEEK_API_URL }}" \
+                -e GOOGLE_GEMINI_API_KEY="${{ secrets.GOOGLE_GEMINI_API_KEY }}" \
                 -p 3000:3000 \
                 playstudy-ai
               echo "Cleaning up old images..."
