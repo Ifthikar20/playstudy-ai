@@ -1,9 +1,9 @@
 import axios, { AxiosError } from "axios";
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
+import { GoogleGenerativeAI, GenerateContentResult } from "@google/generative-ai";
 
-// Define the chat session type based on usage
+// Define the chat session type based on actual Gemini API return type
 interface ChatSession {
-  sendMessage(prompt: string): Promise<any>;
+  sendMessage(prompt: string): Promise<GenerateContentResult>;
 }
 
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
@@ -90,7 +90,7 @@ export async function generateGameContent(gameTitle: string, inputText: string):
     try {
       console.log("Sending request to Gemini...");
       const geminiResult = await geminiChatSession.sendMessage(prompt);
-      const geminiResponse = await geminiResult.response.text();
+      const geminiResponse = geminiResult.response.text();
       console.log(`Gemini API Success (Source: Gemini): "${geminiResponse}"`);
       return geminiResponse;
     } catch (geminiError) {
