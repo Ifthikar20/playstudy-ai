@@ -2,9 +2,11 @@
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# ✅ Install dependencies efficiently (skip unnecessary scripts)
+# ✅ Copy package files first for efficient caching
 COPY package.json package-lock.json ./
-RUN npm ci --production --ignore-scripts
+
+# ✅ Fix: Use --omit=dev instead of --production
+RUN npm ci --omit=dev --ignore-scripts
 
 # ✅ Copy the rest of the application
 COPY . .
@@ -23,10 +25,9 @@ ENV NODE_ENV=production
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
 
-# ✅ Remove unnecessary files (optional)
-RUN rm -rf /app/test /app/docs
+# ✅ Install only production dependencies (from lock file)
+RUN npm ci --omit=dev --ignore-scripts
 
 # ✅ Expose the correct port
 EXPOSE 3000

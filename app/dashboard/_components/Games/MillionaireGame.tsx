@@ -1,7 +1,6 @@
-// /Users/ifthikaraliseyed/Desktop/AI_PLAY_STUDY/playstudy-ai/app/dashboard/_components/Games/MillionaireGame.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import GameLayout from "./GameLayout";
 import { useGameContext } from "@/app/dashboard/_components/GameContext";
 import { Phone, Users, HelpCircle } from "lucide-react";
@@ -114,13 +113,27 @@ export default function MillionaireGame() {
   const [currentAnswers, setCurrentAnswers] = useState<string[]>([]);
   const currentQuestion = quizQuestions[currentQuestionIndex];
 
+  const resetGame = useCallback(() => {
+    setGameState({
+      currentQuestionIndex: 0,
+      gameOver: false,
+    });
+    setXp(0);
+    setLifelines({
+      fiftyFifty: true,
+      phoneAFriend: true,
+      askTheAudience: true,
+    });
+    setCurrentAnswers([...quizQuestions[0].answers]);
+  }, [setGameState]);
+
   useEffect(() => {
     resetGame();
-  }, []);
+  }, [resetGame]);
 
   useEffect(() => {
     setCurrentAnswers([...currentQuestion.answers]);
-  }, [currentQuestionIndex]);
+  }, [currentQuestion.answers, currentQuestionIndex]);
 
   const handleAnswer = (selectedAnswer: string) => {
     if (gameOver) return;
@@ -142,20 +155,6 @@ export default function MillionaireGame() {
         gameOver: true,
       });
     }
-  };
-
-  const resetGame = () => {
-    setGameState({
-      currentQuestionIndex: 0,
-      gameOver: false,
-    });
-    setXp(0);
-    setLifelines({
-      fiftyFifty: true,
-      phoneAFriend: true,
-      askTheAudience: true,
-    });
-    setCurrentAnswers([...quizQuestions[0].answers]);
   };
 
   const useFiftyFifty = () => {
