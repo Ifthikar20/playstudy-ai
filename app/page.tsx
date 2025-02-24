@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from 'react';
 import { Gamepad, Book, Brain, ArrowRight, Menu, X, Sparkles, Zap } from 'lucide-react';
@@ -10,6 +10,11 @@ export default function Page() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<HoveredCard>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [password, setPassword] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  // Set your desired password here
+  const CORRECT_PASSWORD = "PlayStudy2025";
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -21,6 +26,45 @@ export default function Page() {
     };
   }, []);
 
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === CORRECT_PASSWORD) {
+      setIsAuthenticated(true);
+    } else {
+      alert("Incorrect password. Please try again.");
+      setPassword('');
+    }
+  };
+
+  // Show password prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="bg-gray-800 p-6 rounded-xl shadow-lg w-full max-w-md">
+          <h2 className="text-2xl font-bold text-white mb-4 text-center">
+            Enter Password
+          </h2>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password..."
+              className="w-full p-3 bg-gray-700 rounded-lg text-white outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <button
+              type="submit"
+              className="w-full px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors text-white font-semibold"
+            >
+              Submit
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // Main content (only shown after authentication)
   return (
     <div className="min-h-screen bg-gray-900 text-white relative">
       {/* Cursor Glow Effect */}
@@ -116,17 +160,11 @@ export default function Page() {
         {/* Animated GIF Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="relative w-full aspect-video max-w-3xl mx-auto rounded-2xl overflow-hidden">
-            {/* Animated glow effect */}
             <div className="absolute -inset-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl opacity-75 blur-2xl animate-pulse"></div>
-
-            {/* GIF container with border */}
             <div className="relative rounded-xl overflow-hidden border-2 border-purple-500/50 bg-gray-900">
               <div className="relative w-full aspect-video">
-              
               </div>
             </div>
-
-            {/* Additional decorative elements */}
             <div className="absolute -top-10 -left-10 w-32 h-32 bg-purple-500/10 rounded-full filter blur-xl animate-pulse"></div>
             <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-pink-500/10 rounded-full filter blur-xl animate-pulse delay-75"></div>
           </div>

@@ -9,7 +9,8 @@ export default function SideNav() {
 
   const menuItems = [
     { name: "Home", icon: Home, path: "/dashboard" },
-    { name: "History", icon: FileClock, path: "/dashboard/history" },
+    { name: "Your notes", icon: FileClock, path: "/dashboard/your_notes" },
+    { name: "Your performance", icon: WalletCards, path: "/dashboard/your_performance" },
     { name: "Billing", icon: WalletCards, path: "/dashboard/billing" },
     { name: "Settings", icon: Settings, path: "/dashboard/settings" },
   ];
