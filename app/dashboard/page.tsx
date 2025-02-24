@@ -20,7 +20,17 @@ interface QuizQuestion {
   difficulty: string;
 }
 
-const GAMES = {
+interface GameInfo {
+  gradient: string;
+  textColor: string;
+  gif: string;
+  description: string;
+  facts: string;
+  difficulties: [string, string];
+  knownFor: string;
+}
+
+const GAMES: Record<string, GameInfo> = {
   "Quick Quiz": {
     gradient: "from-red-900 to-red-700",
     textColor: "text-red-100",
@@ -58,6 +68,48 @@ const GAMES = {
     knownFor: "Fun recall challenge",
   },
 };
+
+// New GameCard component to encapsulate rendering logic
+function GameCard({
+  title,
+  game,
+  onClick,
+}: {
+  title: string;
+  game: GameInfo;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      className={`interactive-card bg-gradient-to-br ${game.gradient} p-3 sm:p-4 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer`}
+      onClick={onClick}
+    >
+      <Image
+        src={game.gif}
+        alt={`${title} GIF`}
+        width={300}
+        height={128}
+        className="w-full h-32 object-cover rounded-t-lg mb-3"
+        unoptimized
+      />
+      <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
+      <p className={`${game.textColor} text-xs mb-1`}>
+        <span className="font-semibold text-yellow-300">Description:</span> {game.description}
+      </p>
+      <p className={`${game.textColor} text-xs mb-1`}>
+        <span className="font-semibold text-yellow-300">Facts:</span> {game.facts}
+      </p>
+      <p className={`${game.textColor} text-xs mb-1`}>
+        <span className="font-semibold text-yellow-300">Difficulties:</span>{" "}
+        <span className="text-green-400">{game.difficulties[0]}</span> to{" "}
+        <span className="text-red-400">{game.difficulties[1]}</span>
+      </p>
+      <p className={`${game.textColor} text-xs`}>
+        <span className="font-semibold text-yellow-300">Known For:</span> {game.knownFor}
+      </p>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -154,36 +206,11 @@ export default function Dashboard() {
 
       {activeSection === "active" && (
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div
-            className={`interactive-card bg-gradient-to-br ${GAMES["Quick Quiz"].gradient} p-3 sm:p-4 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer`}
+          <GameCard
+            title="Quick Quiz"
+            game={GAMES["Quick Quiz"]}
             onClick={() => handleGameClick("Quick Quiz")}
-          >
-            <Image
-              src={GAMES["Quick Quiz"].gif}
-              alt="Quiz GIF"
-              width={300}
-              height={128}
-              className="w-full h-32 object-cover rounded-t-lg mb-3"
-              unoptimized
-            />
-            <h3 className="text-lg font-bold text-white mb-2">Quick Quiz</h3>
-            <p className={`${GAMES["Quick Quiz"].textColor} text-xs mb-1`}>
-              <span className="font-semibold text-yellow-300">Description:</span>{" "}
-              {GAMES["Quick Quiz"].description}
-            </p>
-            <p className={`${GAMES["Quick Quiz"].textColor} text-xs mb-1`}>
-              <span className="font-semibold text-yellow-300">Facts:</span> {GAMES["Quick Quiz"].facts}
-            </p>
-            <p className={`${GAMES["Quick Quiz"].textColor} text-xs mb-1`}>
-              <span className="font-semibold text-yellow-300">Difficulties:</span>{" "}
-              <span className="text-green-400">{GAMES["Quick Quiz"].difficulties[0]}</span> to{" "}
-              <span className="text-red-400">{GAMES["Quick Quiz"].difficulties[1]}</span>
-            </p>
-            <p className={`${GAMES["Quick Quiz"].textColor} text-xs`}>
-              <span className="font-semibold text-yellow-300">Known For:</span>{" "}
-              {GAMES["Quick Quiz"].knownFor}
-            </p>
-          </div>
+          />
         </div>
       )}
 
@@ -192,35 +219,12 @@ export default function Dashboard() {
           {Object.entries(GAMES)
             .filter(([game]) => game !== "Quick Quiz")
             .map(([gameTitle, game]) => (
-              <div
+              <GameCard
                 key={gameTitle}
-                className={`interactive-card bg-gradient-to-br ${game.gradient} p-3 sm:p-4 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer`}
+                title={gameTitle}
+                game={game}
                 onClick={() => handleGameClick(gameTitle)}
-              >
-                <Image
-                  src={game.gif}
-                  alt={`${gameTitle} GIF`}
-                  width={300}
-                  height={128}
-                  className="w-full h-32 object-cover rounded-t-lg mb-3"
-                  unoptimized
-                />
-                <h3 className="text-lg font-bold text-white mb-2">{gameTitle}</h3>
-                <p className={`${game.textColor} text-xs mb-1`}>
-                  <span className="font-semibold text-yellow-300">Description:</span> {game.description}
-                </p>
-                <p className={`${game.textColor} text-xs mb-1`}>
-                  <span className="font-semibold text-yellow-300">Facts:</span> {game.facts}
-                </p>
-                <p className={`${game.textColor} text-xs mb-1`}>
-                  <span className="font-semibold text-yellow-300">Difficulties:</span>{" "}
-                  <span className="text-green-400">{game.difficulties[0]}</span> to{" "}
-                  <span className="text-red-400">{game.difficulties[1]}</span>
-                </p>
-                <p className={`${game.textColor} text-xs`}>
-                  <span className="font-semibold text-yellow-300">Known For:</span> {game.knownFor}
-                </p>
-              </div>
+              />
             ))}
         </div>
       )}
@@ -229,9 +233,7 @@ export default function Dashboard() {
         <GameModal gameTitle={selectedGame} onClose={() => setIsModalOpen(false)} />
       )}
 
-      {hangmanQuiz && (
-        <Hangman quizData={hangmanQuiz} onClose={() => setHangmanQuiz(null)} />
-      )}
+      {hangmanQuiz && <Hangman quizData={hangmanQuiz} onClose={() => setHangmanQuiz(null)} />}
 
       <div className="mt-6 text-center">
         <button onClick={handleSignOut} className="btn-primary text-sm sm:text-base">

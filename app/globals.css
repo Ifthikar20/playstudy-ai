@@ -83,9 +83,7 @@ body {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-
-/* Guess  the word */
-
+/* Guess the word */
 @keyframes pulse-bg {
   0% { opacity: 0.8; }
   50% { opacity: 1; }
@@ -95,3 +93,71 @@ body {
 .animate-pulse-bg {
   animation: pulse-bg 3s infinite;
 }
+
+/* New animations for scroll-down and creative UI */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slide-down {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes text-glow {
+  0%, 100% { text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); }
+  50% { text-shadow: 0 0 20px rgba(236, 72, 153, 0.8), 0 0 30px rgba(236, 72, 153, 0.4); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+@keyframes bounce-right {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes gradient-shift {
+  0% { transform: translate(-10%, -10%) scale(1); }
+  50% { transform: translate(10%, 10%) scale(1.1); }
+  100% { transform: translate(-10%, -10%) scale(1); }
+}
+
+.animate-fade-in { animation: fade-in 0.8s ease-out; }
+.animate-fade-in-up { animation: fade-in-up 0.8s ease-out; }
+.animate-slide-up { animation: slide-up 0.8s ease-out; }
+.animate-slide-down { animation: slide-down 0.5s ease-out; }
+.animate-text-glow { animation: text-glow 2s infinite; }
+.animate-twinkle { animation: twinkle 1.5s infinite; }
+.animate-pulse-slow { animation: pulse-slow 3s infinite; }
+.animate-bounce-right { animation: bounce-right 1s infinite; }
+.animate-spin-slow { animation: spin-slow 4s linear infinite; }
+.animate-gradient-shift { animation: gradient-shift 6s infinite; }
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-150 { animation-delay: 0.15s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
