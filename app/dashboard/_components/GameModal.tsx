@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 
 interface GameModalProps {
   gameTitle: string;
@@ -10,88 +9,76 @@ interface GameModalProps {
 
 export default function GameModal({ gameTitle, onClose }: GameModalProps) {
   const [inputText, setInputText] = useState("");
-  const [aiOutput, setAiOutput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputText(e.target.value);
-  };
-
-  const handleSubmit = async () => {
-    if (!inputText.trim()) {
-      setError("Please enter some text");
-      return;
+  // Adjust textarea height dynamically
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto"; // Reset height to recalculate
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 400)}px`; // Cap at 400px
     }
+  }, [inputText]);
 
-    setLoading(true);
-    setError(null);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/generate-game", {
+      const response = await fetch("/api/convert-to-quiz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gameTitle, inputText }),
+        body: JSON.stringify({ content: inputText, game: gameTitle }),
       });
 
-      const data = await response.json();
-      console.log("API Response:", data);
+      if (!response.ok) throw new Error("Failed to process input");
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to generate game");
+      const quizData = await response.json();
+
+      if (gameTitle === "Hangman") {
+        window.dispatchEvent(new CustomEvent("launchHangman", { detail: quizData }));
+        onClose();
       }
-
-      setAiOutput(data.aiResponse);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      console.error("Error fetching game content:", err);
+    } catch (error) {
+      console.error("Error submitting input:", error);
+      alert("Failed to process input. Please try again.");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-2xl">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-white">{gameTitle} Input</h2>
-          <button onClick={onClose} className="text-white hover:text-gray-300">
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-        <textarea
-          value={inputText}
-          onChange={handleInputChange}
-          placeholder={`Enter text for ${gameTitle}...`}
-          className="w-full h-40 p-4 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 mb-4"
-        />
-        {aiOutput && (
-          <div className="mt-4 p-4 bg-gray-700 rounded-lg">
-            <h3 className="text-lg font-semibold text-white">Generated Game:</h3>
-            <p className="text-gray-300">{aiOutput}</p>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+      <div className="bg-gray-800 p-6 rounded-lg w-full max-w-lg flex flex-col">
+        <h2 className="text-xl font-bold text-white mb-4">{gameTitle}</h2>
+        <form onSubmit={handleSubmit} className="flex flex-col flex-grow">
+          <textarea
+            ref={textareaRef}
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            placeholder="Enter your paragraph here..."
+            className="w-full min-h-[128px] max-h-[400px] p-2 bg-gray-700 text-white rounded mb-4 resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={isSubmitting}
+          />
+          <div className="flex justify-end gap-2 mt-auto">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Processing..." : "Submit"}
+            </button>
           </div>
-        )}
-        {error && (
-          <div className="mt-4 p-4 bg-red-500/20 rounded-lg text-red-300">{error}</div>
-        )}
-        <p className="text-gray-300 text-sm mt-2">
-          Current input: {inputText.length} characters
-        </p>
-        <div className="mt-4 flex justify-end gap-4">
-          <button
-            onClick={onClose}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
-          >
-            Close
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-[0_0_10px_#9f7aea] hover:shadow-[0_0_15px_#9f7aea] disabled:opacity-50"
-            disabled={loading}
-          >
-            {loading ? "Generating..." : "Submit"}
-          </button>
-        </div>
+        </form>
       </div>
     </div>
   );

@@ -82,3 +82,16 @@ body {
   width: 90%;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+
+/* Guess  the word */
+
+@keyframes pulse-bg {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+.animate-pulse-bg {
+  animation: pulse-bg 3s infinite;
+}

@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image"; // Import Next.js Image component
+import Image from "next/image";
 import { Brain, Gamepad, Book } from "lucide-react";
 import GameModal from "@/app/dashboard/_components/GameModal";
+import Hangman from "@/app/dashboard/_components/Games/HangmanGame";
 
 interface User {
   name: string | null;
@@ -12,7 +13,13 @@ interface User {
   image: string | null;
 }
 
-// Predefine game data to avoid repetition in JSX
+interface QuizQuestion {
+  question: string;
+  answers: string[];
+  correct_answer: string;
+  difficulty: string;
+}
+
 const GAMES = {
   "Quick Quiz": {
     gradient: "from-red-900 to-red-700",
@@ -57,9 +64,9 @@ export default function Dashboard() {
   const [activeSection, setActiveSection] = useState<"active" | "game" | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
+  const [hangmanQuiz, setHangmanQuiz] = useState<QuizQuestion[] | null>(null);
   const router = useRouter();
 
-  // Memoize fetchSession to prevent unnecessary re-renders
   const fetchSession = useCallback(async () => {
     try {
       const response = await fetch("/api/auth/session", { cache: "no-store" });
@@ -80,7 +87,14 @@ export default function Dashboard() {
     fetchSession();
   }, [fetchSession]);
 
-  // Memoize sign out handler
+  useEffect(() => {
+    const handleLaunchHangman = (e: CustomEvent) => {
+      setHangmanQuiz(e.detail);
+    };
+    window.addEventListener("launchHangman", handleLaunchHangman as EventListener);
+    return () => window.removeEventListener("launchHangman", handleLaunchHangman as EventListener);
+  }, []);
+
   const handleSignOut = useCallback(async () => {
     try {
       const response = await fetch("/api/auth/signout", {
@@ -95,7 +109,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Memoize game click handler
   const handleGameClick = useCallback((gameTitle: string) => {
     setSelectedGame(gameTitle);
     setIsModalOpen(true);
@@ -139,7 +152,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Active Learning Section */}
       {activeSection === "active" && (
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div
@@ -152,7 +164,7 @@ export default function Dashboard() {
               width={300}
               height={128}
               className="w-full h-32 object-cover rounded-t-lg mb-3"
-              unoptimized // Use unoptimized for GIFs as Next.js doesn't optimize animated images
+              unoptimized
             />
             <h3 className="text-lg font-bold text-white mb-2">Quick Quiz</h3>
             <p className={`${GAMES["Quick Quiz"].textColor} text-xs mb-1`}>
@@ -175,7 +187,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Game-Based Learning Section */}
       {activeSection === "game" && (
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
           {Object.entries(GAMES)
@@ -192,7 +203,7 @@ export default function Dashboard() {
                   width={300}
                   height={128}
                   className="w-full h-32 object-cover rounded-t-lg mb-3"
-                  unoptimized // Use unoptimized for GIFs
+                  unoptimized
                 />
                 <h3 className="text-lg font-bold text-white mb-2">{gameTitle}</h3>
                 <p className={`${game.textColor} text-xs mb-1`}>
@@ -214,9 +225,12 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Game Modal */}
       {isModalOpen && selectedGame && (
         <GameModal gameTitle={selectedGame} onClose={() => setIsModalOpen(false)} />
+      )}
+
+      {hangmanQuiz && (
+        <Hangman quizData={hangmanQuiz} onClose={() => setHangmanQuiz(null)} />
       )}
 
       <div className="mt-6 text-center">

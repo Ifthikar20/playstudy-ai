@@ -1,4 +1,3 @@
-// tailwind.config.ts
 import type { Config } from "tailwindcss";
 
 export default {
@@ -24,6 +23,17 @@ export default {
       },
       borderRadius: {
         lg: "0.75rem",
+      },
+      // Updated animation for darker background effect
+      animation: {
+        "pulse-bg": "pulse-bg 3s infinite ease-in-out",
+      },
+      keyframes: {
+        "pulse-bg": {
+          "0%": { transform: "scale(1)", backgroundColor: "#111827" }, // Very dark gray (gray-900)
+          "50%": { transform: "scale(1.02)", backgroundColor: "#1f2937" }, // Slightly lighter dark gray (gray-800)
+          "100%": { transform: "scale(1)", backgroundColor: "#111827" }, // Back to very dark gray
+        },
       },
     },
   },

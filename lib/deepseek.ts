@@ -33,7 +33,28 @@ export async function generateGameContent(gameTitle: string, inputText: string):
   const DEEPSEEK_API_URL = process.env.DEEPSEEK_API_URL || "https://api.deepseek.com/v1/chat/completions";
   const GEMINI_API_KEY = process.env.GOOGLE_GEMINI_API_KEY;
 
-  const prompt = `Transform the following text into a ${gameTitle} game format: ${inputText}`;
+  // Fixed prompt structure for all quizzes
+  const prompt = `
+You are an AI that transforms educational content into interactive game formats. Transform the following text into a set of quiz questions for the game "${gameTitle}". Return the result as a JSON array in this exact format:
+
+[
+  {
+    "question": "string",
+    "answers": ["A. string", "B. string", "C. string", "D. string"],
+    "correct_answer": "Letter. string",
+    "difficulty": "Easy" | "Medium"
+  }
+]
+
+Each question should:
+- Be derived directly from the input text.
+- Have four answer options (A, B, C, D).
+- Specify the correct answer with its option letter (e.g., "B. Answer").
+- Assign a difficulty of "Easy" or "Medium" based on complexity.
+
+Input text:
+${inputText}
+`;
 
   // Try DeepSeek if available
   if (DEEPSEEK_API_KEY) {

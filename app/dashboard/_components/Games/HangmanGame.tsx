@@ -1,8 +1,6 @@
-// /Users/ifthikaraliseyed/Desktop/AI_PLAY_STUDY/playstudy-ai/app/dashboard/_components/Games/HangmanGame.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import GameLayout from "./GameLayout";
 
 interface QuizQuestion {
   question: string;
@@ -11,252 +9,102 @@ interface QuizQuestion {
   difficulty: string;
 }
 
-const quizQuestions: QuizQuestion[] = [
-  {
-    question: "What is the primary source of energy for Earth's climate system?",
-    answers: [
-      "A. The Moon's gravitational pull",
-      "B. The Sun's radiation",
-      "C. Earth's core heat",
-      "D. Human industrial activity",
-    ],
-    correct_answer: "B. The Sun's radiation",
-    difficulty: "Medium",
-  },
-  {
-    question: "Which planet is known as the Red Planet?",
-    answers: [
-      "A. Jupiter",
-      "B. Venus",
-      "C. Mars",
-      "D. Mercury",
-    ],
-    correct_answer: "C. Mars",
-    difficulty: "Easy",
-  },
-  {
-    question: "What gas do plants primarily use for photosynthesis?",
-    answers: [
-      "A. Oxygen",
-      "B. Nitrogen",
-      "C. Carbon dioxide",
-      "D. Hydrogen",
-    ],
-    correct_answer: "C. Carbon dioxide",
-    difficulty: "Medium",
-  },
-  {
-    question: "Who wrote the play 'Romeo and Juliet'?",
-    answers: [
-      "A. Charles Dickens",
-      "B. William Shakespeare",
-      "C. Jane Austen",
-      "D. Mark Twain",
-    ],
-    correct_answer: "B. William Shakespeare",
-    difficulty: "Medium",
-  },
-  {
-    question: "What is the largest organ in the human body?",
-    answers: [
-      "A. Liver",
-      "B. Brain",
-      "C. Skin",
-      "D. Heart",
-    ],
-    correct_answer: "C. Skin",
-    difficulty: "Easy",
-  },
-];
+interface HangmanProps {
+  quizData: QuizQuestion[];
+  onClose: () => void;
+}
 
-// Colorful and animated hangman stages
-const hangmanStages: string[] = [
-  `
-    <span class="text-purple-500">+---+</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-purple-500">=========</span>
-  `,
-  `
-    <span class="text-purple-500">+---+</span>
-    <span class="text-pink-500 animate-bounce">O</span><span class="text-gray-400">   |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-purple-500">=========</span>
-  `,
-  `
-    <span class="text-purple-500">+---+</span>
-    <span class="text-pink-500 animate-bounce">O</span><span class="text-gray-400">   |</span>
-    <span class="text-yellow-500">|</span><span class="text-gray-400">   |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-purple-500">=========</span>
-  `,
-  `
-    <span class="text-purple-500">+---+</span>
-    <span class="text-pink-500 animate-bounce">O</span><span class="text-gray-400">   |</span>
-    <span class="text-yellow-500">/</span><span class="text-green-500">|</span><span class="text-gray-400">   |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-purple-500">=========</span>
-  `,
-  `
-    <span class="text-purple-500">+---+</span>
-    <span class="text-pink-500 animate-bounce">O</span><span class="text-gray-400">   |</span>
-    <span class="text-yellow-500">/</span><span class="text-green-500">|\\</span><span class="text-gray-400">  |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-purple-500">=========</span>
-  `,
-  `
-    <span class="text-purple-500">+---+</span>
-    <span class="text-pink-500 animate-bounce">O</span><span class="text-gray-400">   |</span>
-    <span class="text-yellow-500">/</span><span class="text-green-500">|\\</span><span class="text-gray-400">  |</span>
-    <span class="text-blue-500">/</span><span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-purple-500">=========</span>
-  `,
-  `
-    <span class="text-purple-500">+---+</span>
-    <span class="text-pink-500 animate-bounce">O</span><span class="text-gray-400">   |</span>
-    <span class="text-yellow-500">/</span><span class="text-green-500">|\\</span><span class="text-gray-400">  |</span>
-    <span class="text-blue-500">/</span><span class="text-red-500 animate-pulse"> \\</span><span class="text-gray-400">  |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-gray-400">    |</span>
-    <span class="text-purple-500">=========</span>
-  `,
-];
+export default function Hangman({ quizData, onClose }: HangmanProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [guesses, setGuesses] = useState<string[]>([]);
+  const [attempts, setAttempts] = useState(6);
 
-export default function HangmanGame() {
-  const [attemptsLeft, setAttemptsLeft] = useState(3);
-  const [currentStage, setCurrentStage] = useState(0);
-  const [displayWord, setDisplayWord] = useState<string[]>([]);
-  const [guess, setGuess] = useState("");
-  const [gameOver, setGameOver] = useState(false);
-  const [currentQuiz, setCurrentQuiz] = useState<QuizQuestion>(
-    quizQuestions[Math.floor(Math.random() * quizQuestions.length)]
-  );
+  const currentQuestion = quizData[currentIndex];
+  const fullAnswer = currentQuestion.correct_answer.split(". ")[1].toLowerCase();
+  const answerWords = fullAnswer.split(" ");
+  const fillerWords = ["of", "and", "the", "in", "to", "a", "an"];
+  const contentWords = answerWords.filter((word) => !fillerWords.includes(word));
+  const wordToGuess = contentWords[contentWords.length - 1];
+  const hint = fullAnswer.slice(0, fullAnswer.lastIndexOf(wordToGuess)).trim() + " ";
 
-  const correctAnswer = currentQuiz.correct_answer.split(". ")[1].toLowerCase();
+  const displayWord = wordToGuess
+    .split("")
+    .map((char) => (guesses.includes(char) || char === " " ? char : "_"))
+    .join(" ");
+
+  const handleGuess = (letter: string) => {
+    if (!guesses.includes(letter)) {
+      setGuesses([...guesses, letter]);
+      if (!wordToGuess.includes(letter)) setAttempts(attempts - 1);
+    }
+  };
+
+  const isGameOver = attempts === 0 || displayWord.replace(/\s/g, "") === wordToGuess;
 
   useEffect(() => {
-    setDisplayWord(correctAnswer.replace(/[a-zA-Z']/g, "_").split(""));
-  }, [correctAnswer]);
-
-  const handleGuess = () => {
-    if (gameOver || !guess) return;
-
-    const lowerGuess = guess.toLowerCase();
-    if (lowerGuess.length === 1) {
-      const newDisplayWord = [...displayWord];
-      let correctGuess = false;
-
-      for (let i = 0; i < correctAnswer.length; i++) {
-        if (correctAnswer[i] === lowerGuess) {
-          newDisplayWord[i] = lowerGuess;
-          correctGuess = true;
+    if (isGameOver) {
+      const timer = setTimeout(() => {
+        if (currentIndex < quizData.length - 1) {
+          setCurrentIndex(currentIndex + 1);
+          setGuesses([]);
+          setAttempts(6);
+        } else {
+          onClose();
         }
-      }
-
-      if (!correctGuess) {
-        setAttemptsLeft((prev) => prev - 1);
-        setCurrentStage((prev) => prev + 1);
-      }
-      setDisplayWord(newDisplayWord);
-    } else {
-      if (lowerGuess === correctAnswer) {
-        setDisplayWord(correctAnswer.split(""));
-      } else {
-        setAttemptsLeft((prev) => prev - 1);
-        setCurrentStage((prev) => prev + 1);
-      }
+      }, 2000);
+      return () => clearTimeout(timer);
     }
-
-    setGuess("");
-    checkGameStatus();
-  };
-
-  const checkGameStatus = () => {
-    if (displayWord.join("") === correctAnswer) {
-      setGameOver(true);
-    } else if (attemptsLeft <= 1) {
-      setGameOver(true);
-      setDisplayWord(correctAnswer.split(""));
-    }
-  };
-
-  const resetGame = () => {
-    const newQuiz = quizQuestions[Math.floor(Math.random() * quizQuestions.length)];
-    setCurrentQuiz(newQuiz);
-    setAttemptsLeft(3);
-    setCurrentStage(0);
-    setDisplayWord(newQuiz.correct_answer.split(". ")[1].toLowerCase().replace(/[a-zA-Z']/g, "_").split(""));
-    setGameOver(false);
-    setGuess("");
-  };
+  }, [isGameOver, currentIndex, quizData.length, onClose]);
 
   return (
-    <GameLayout title="Hangman Game">
-      <p className="text-gray-300 mb-2">{currentQuiz.question}</p>
-      <pre
-        className="text-gray-400 mb-4 font-mono text-sm sm:text-base leading-tight animate-fade-in"
-        dangerouslySetInnerHTML={{ __html: hangmanStages[currentStage] }}
-      />
-      <p className="text-xl font-mono mb-4 text-yellow-400 animate-pulse-slow">
-        {displayWord.join(" ")}
-      </p>
-      <p className="text-gray-400 mb-2">
-        Attempts left: <span className="text-red-500">{attemptsLeft}</span>
-      </p>
-      <div className="mb-4">
-        {currentQuiz.answers.map((answer) => (
-          <p key={answer} className="text-gray-400 text-sm hover:text-purple-400 transition-colors">
-            {answer}
-          </p>
-        ))}
+    <div className="fixed inset-0 bg-gray-900 flex items-center justify-center animate-bg">
+      <div className="bg-gray-800 p-8 rounded-xl w-full max-w-lg text-white shadow-lg border-4 border-teal-400 transform transition-all hover:scale-105">
+        <h2 className="text-3xl font-extrabold mb-4 text-center text-teal-300 drop-shadow-md">
+          Guess the Word!
+        </h2>
+        <p className="mb-2 font-semibold text-lg text-gray-200">
+          {currentQuestion.question} 
+          <span className="text-sm text-gray-400"> (Round {currentIndex + 1} of {quizData.length})</span>
+        </p>
+        <p className="text-4xl font-mono mb-6 bg-gray-700 p-4 rounded-lg text-center text-blue-400">
+          {hint}
+          <span className="font-bold text-orange-500">{displayWord}</span>
+        </p>
+        <p className="text-xl text-gray-300">Attempts Left: <span className="font-bold text-lime-500">{attempts}</span></p>
+        {isGameOver && (
+          <div className="mt-6 p-4 bg-gray-600 rounded-lg text-center">
+            <p className={`text-2xl font-bold ${attempts === 0 ? "text-red-500" : "text-lime-500"}`}>
+              {attempts === 0 ? "Time’s Up!" : "Winner!"}
+            </p>
+            <p className="mt-2 text-lg">
+              The answer was: <span className="font-bold text-blue-400">{fullAnswer}</span>
+            </p>
+            <p className="mt-2 text-sm text-gray-400">
+              {currentIndex < quizData.length - 1
+                ? "Next round starting soon..."
+                : "Game Show Over!"}
+            </p>
+          </div>
+        )}
+        <div className="grid grid-cols-7 gap-3 mt-6">
+          {"abcdefghijklmnopqrstuvwxyz".split("").map((letter) => (
+            <button
+              key={letter}
+              onClick={() => handleGuess(letter)}
+              disabled={guesses.includes(letter) || isGameOver}
+              className="p-3 bg-teal-600 rounded-full text-white font-bold text-lg disabled:bg-gray-500 disabled:cursor-not-allowed hover:bg-teal-700 transition-colors"
+            >
+              {letter.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={onClose}
+          className="mt-6 px-6 py-2 bg-red-600 rounded-full text-white font-semibold hover:bg-red-800 transition-colors w-full"
+        >
+          Exit Show
+        </button>
       </div>
-      {!gameOver ? (
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={guess}
-            onChange={(e) => setGuess(e.target.value)}
-            placeholder="Enter a letter or full answer"
-            className="bg-gray-700 text-white rounded-lg px-3 py-2 outline-none border border-purple-500/50 focus:border-purple-500 transition-all"
-            disabled={gameOver}
-          />
-          <button
-            onClick={handleGuess}
-            className="btn-primary px-4 py-2 text-sm hover:scale-105 transition-transform"
-            disabled={gameOver}
-          >
-            Guess
-          </button>
-        </div>
-      ) : (
-        <div>
-          <p className={`text-lg mb-4 ${attemptsLeft > 0 ? "text-green-500" : "text-red-500"} animate-bounce`}>
-            {attemptsLeft > 0
-              ? "Congratulations! You won! 🎉"
-              : "Game Over! Better luck next time. 😢"}
-          </p>
-          <button
-            onClick={resetGame}
-            className="btn-primary px-4 py-2 text-sm hover:scale-105 transition-transform"
-          >
-            Play Again
-          </button>
-        </div>
-      )}
-    </GameLayout>
+    </div>
   );
 }
