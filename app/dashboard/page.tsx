@@ -9,6 +9,7 @@ import Hangman from "@/app/dashboard/_components/Games/HangmanGame";
 import MillionaireGame from "@/app/dashboard/_components/Games/MillionaireGame";
 import QuickQuizGame from "@/app/dashboard/_components/Games/QuickQuizGame";
 import MemoryMatchGame from "@/app/dashboard/_components/Games/MemoryMatchGame";
+import CrossWordGame from "@/app/dashboard/_components/Games/CrossWordGame"; 
 
 interface User {
   name: string | null;
@@ -65,6 +66,14 @@ const GAMES: Record<string, GameInfo> = {
     facts: "Boosts memory skills.",
     difficulties: ["Easy", "Complex"],
     knownFor: "Fun recall challenge",
+  },
+  CrossWord: {
+    textColor: "text-white",
+    gif: "https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDZrYnZqdjkxMjF3MmppMW53cjFnOHV4dm9jNTIxNHUydGd6d2Y2ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/fVEdYhyl70a7otSHjj/giphy.gif",
+    description: "Answer trivia questions.",
+    facts: "Was Invented in 1990",
+    difficulties: ["Find", "Challenging"],
+    knownFor: "Trivia & lifelines",
   },
 };
 
@@ -130,6 +139,7 @@ export default function Dashboard() {
   const [millionaireQuiz, setMillionaireQuiz] = useState<QuizQuestion[] | null>(null);
   const [quickQuizData, setQuickQuizData] = useState<QuizQuestion[] | null>(null);
   const [memoryMatchQuiz, setMemoryMatchQuiz] = useState<QuizQuestion[] | null>(null);
+  const [crossWordQuiz, setCrossWordQuiz] = useState<QuizQuestion[] | null>(null); // Added for CrossWord
   const router = useRouter();
 
   const fetchSession = useCallback(async () => {
@@ -153,34 +163,25 @@ export default function Dashboard() {
     fetchSession();
   }, [fetchSession]);
 // Game event listeners
-// Game event listeners
 useEffect(() => {
-  const handleLaunchHangman = (e: CustomEvent) => {
-    setHangmanQuiz(e.detail);
-  };
-  
-  const handleLaunchMillionaire = (e: CustomEvent) => {
-    setMillionaireQuiz(e.detail);
-  };
-  
-  const handleLaunchQuickQuiz = (e: CustomEvent) => {
-    setQuickQuizData(e.detail);
-  };
-  
-  const handleLaunchMemoryMatch = (e: CustomEvent) => {
-    setMemoryMatchQuiz(e.detail); // Assuming setMemoryMatchQuiz is the state setter for Memory Match
-  };
-  
+  const handleLaunchHangman = (e: CustomEvent) => setHangmanQuiz(e.detail);
+  const handleLaunchMillionaire = (e: CustomEvent) => setMillionaireQuiz(e.detail);
+  const handleLaunchQuickQuiz = (e: CustomEvent) => setQuickQuizData(e.detail);
+  const handleLaunchMemoryMatch = (e: CustomEvent) => setMemoryMatchQuiz(e.detail);
+  const handleLaunchCrossWord = (e: CustomEvent) => setCrossWordQuiz(e.detail); // Added for CrossWord
+
   window.addEventListener("launchHangman", handleLaunchHangman as EventListener);
   window.addEventListener("launchMillionaire", handleLaunchMillionaire as EventListener);
   window.addEventListener("launchQuickQuiz", handleLaunchQuickQuiz as EventListener);
-  window.addEventListener("launchMemoryMatch", handleLaunchMemoryMatch as EventListener); // Added listener for Memory Match
-  
+  window.addEventListener("launchMemoryMatch", handleLaunchMemoryMatch as EventListener);
+  window.addEventListener("launchCrossWord", handleLaunchCrossWord as EventListener); // Added listener
+
   return () => {
     window.removeEventListener("launchHangman", handleLaunchHangman as EventListener);
     window.removeEventListener("launchMillionaire", handleLaunchMillionaire as EventListener);
     window.removeEventListener("launchQuickQuiz", handleLaunchQuickQuiz as EventListener);
-    window.removeEventListener("launchMemoryMatch", handleLaunchMemoryMatch as EventListener); // Added cleanup for Memory Match
+    window.removeEventListener("launchMemoryMatch", handleLaunchMemoryMatch as EventListener);
+    window.removeEventListener("launchCrossWord", handleLaunchCrossWord as EventListener); // Added cleanup
   };
 }, []);
 
@@ -278,6 +279,7 @@ useEffect(() => {
       {memoryMatchQuiz && (
         <MemoryMatchGame quizData={memoryMatchQuiz} onClose={() => setMemoryMatchQuiz(null)} />
       )}
+      {crossWordQuiz && <CrossWordGame quizData={crossWordQuiz} onClose={() => setCrossWordQuiz(null)} />}
       <div className="mt-6 text-center">
         <button onClick={handleSignOut} className="btn-primary text-sm sm:text-base">
           Sign Out

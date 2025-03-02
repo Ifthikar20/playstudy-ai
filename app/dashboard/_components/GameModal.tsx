@@ -99,6 +99,9 @@ export default function GameModal({
       } else if (gameTitle === "Memory Match") {
         window.dispatchEvent(new CustomEvent("launchMemoryMatch", { detail: quizData }));
         onClose();
+      } else if (gameTitle === "CrossWord") {
+        window.dispatchEvent(new CustomEvent("launchCrossWord", { detail: quizData }));
+        onClose();
       }
     } catch (error) {
       console.error("Error submitting input:", error);
