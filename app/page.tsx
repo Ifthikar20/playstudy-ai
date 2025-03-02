@@ -569,7 +569,7 @@ export default function Page() {
                 </div>
               </div>
               <div className="mt-8 text-center text-sm text-gray-400">
-                &copy; 2025 PlayStudy.AI. All rights reserved.
+                &copy; 2025 PlayStudy.AI. All rights reserved. test
               </div>
             </div>
           </footer>
