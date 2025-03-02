@@ -1,3 +1,4 @@
+// app/dashboard/_components/GameModal.tsx
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -94,6 +95,9 @@ export default function GameModal({
         onClose();
       } else if (gameTitle === "Quick Quiz") {
         window.dispatchEvent(new CustomEvent("launchQuickQuiz", { detail: quizData }));
+        onClose();
+      } else if (gameTitle === "Memory Match") {
+        window.dispatchEvent(new CustomEvent("launchMemoryMatch", { detail: quizData }));
         onClose();
       }
     } catch (error) {

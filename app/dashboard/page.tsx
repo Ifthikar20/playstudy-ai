@@ -7,6 +7,8 @@ import { Brain, Gamepad, Book } from "lucide-react";
 import GameModal from "@/app/dashboard/_components/GameModal";
 import Hangman from "@/app/dashboard/_components/Games/HangmanGame";
 import MillionaireGame from "@/app/dashboard/_components/Games/MillionaireGame";
+import QuickQuizGame from "@/app/dashboard/_components/Games/QuickQuizGame";
+import MemoryMatchGame from "@/app/dashboard/_components/Games/MemoryMatchGame";
 
 interface User {
   name: string | null;
@@ -126,6 +128,8 @@ export default function Dashboard() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [hangmanQuiz, setHangmanQuiz] = useState<QuizQuestion[] | null>(null);
   const [millionaireQuiz, setMillionaireQuiz] = useState<QuizQuestion[] | null>(null);
+  const [quickQuizData, setQuickQuizData] = useState<QuizQuestion[] | null>(null);
+  const [memoryMatchQuiz, setMemoryMatchQuiz] = useState<QuizQuestion[] | null>(null);
   const router = useRouter();
 
   const fetchSession = useCallback(async () => {
@@ -148,25 +152,38 @@ export default function Dashboard() {
   useEffect(() => {
     fetchSession();
   }, [fetchSession]);
+// Game event listeners
+// Game event listeners
+useEffect(() => {
+  const handleLaunchHangman = (e: CustomEvent) => {
+    setHangmanQuiz(e.detail);
+  };
+  
+  const handleLaunchMillionaire = (e: CustomEvent) => {
+    setMillionaireQuiz(e.detail);
+  };
+  
+  const handleLaunchQuickQuiz = (e: CustomEvent) => {
+    setQuickQuizData(e.detail);
+  };
+  
+  const handleLaunchMemoryMatch = (e: CustomEvent) => {
+    setMemoryMatchQuiz(e.detail); // Assuming setMemoryMatchQuiz is the state setter for Memory Match
+  };
+  
+  window.addEventListener("launchHangman", handleLaunchHangman as EventListener);
+  window.addEventListener("launchMillionaire", handleLaunchMillionaire as EventListener);
+  window.addEventListener("launchQuickQuiz", handleLaunchQuickQuiz as EventListener);
+  window.addEventListener("launchMemoryMatch", handleLaunchMemoryMatch as EventListener); // Added listener for Memory Match
+  
+  return () => {
+    window.removeEventListener("launchHangman", handleLaunchHangman as EventListener);
+    window.removeEventListener("launchMillionaire", handleLaunchMillionaire as EventListener);
+    window.removeEventListener("launchQuickQuiz", handleLaunchQuickQuiz as EventListener);
+    window.removeEventListener("launchMemoryMatch", handleLaunchMemoryMatch as EventListener); // Added cleanup for Memory Match
+  };
+}, []);
 
-  // Game event listeners
-  useEffect(() => {
-    const handleLaunchHangman = (e: CustomEvent) => {
-      setHangmanQuiz(e.detail);
-    };
-    
-    const handleLaunchMillionaire = (e: CustomEvent) => {
-      setMillionaireQuiz(e.detail);
-    };
-    
-    window.addEventListener("launchHangman", handleLaunchHangman as EventListener);
-    window.addEventListener("launchMillionaire", handleLaunchMillionaire as EventListener);
-    
-    return () => {
-      window.removeEventListener("launchHangman", handleLaunchHangman as EventListener);
-      window.removeEventListener("launchMillionaire", handleLaunchMillionaire as EventListener);
-    };
-  }, []);
 
   const handleSignOut = useCallback(async () => {
     try {
@@ -256,6 +273,11 @@ export default function Dashboard() {
 
       {hangmanQuiz && <Hangman quizData={hangmanQuiz} onClose={() => setHangmanQuiz(null)} />}
       {millionaireQuiz && <MillionaireGame quizData={millionaireQuiz} onClose={() => setMillionaireQuiz(null)} />}
+        {/* Quick Quiz Game */}
+      {quickQuizData && <QuickQuizGame quizData={quickQuizData} onClose={() => setQuickQuizData(null)} />}
+      {memoryMatchQuiz && (
+        <MemoryMatchGame quizData={memoryMatchQuiz} onClose={() => setMemoryMatchQuiz(null)} />
+      )}
       <div className="mt-6 text-center">
         <button onClick={handleSignOut} className="btn-primary text-sm sm:text-base">
           Sign Out
