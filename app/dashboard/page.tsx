@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Brain, Gamepad, Book } from "lucide-react";
 import GameModal from "@/app/dashboard/_components/GameModal";
 import Hangman from "@/app/dashboard/_components/Games/HangmanGame";
+import MillionaireGame from "@/app/dashboard/_components/Games/MillionaireGame";
 
 interface User {
   name: string | null;
@@ -21,7 +22,7 @@ interface QuizQuestion {
 }
 
 interface GameInfo {
-  gradient: string;
+  gradient?: string; // Made optional since we're removing it
   textColor: string;
   gif: string;
   description: string;
@@ -32,35 +33,31 @@ interface GameInfo {
 
 const GAMES: Record<string, GameInfo> = {
   "Quick Quiz": {
-    gradient: "from-red-900 to-red-700",
-    textColor: "text-red-100",
-    gif: "https://media.giphy.com/media/26FPyQsENxP6P0AOk/giphy.gif",
+    textColor: "text-white",
+    gif: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXV4aDYzZXhuNXA4bnNhMzdqNzlnY3I3bWJtenhreTExN2kyMmxvdiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/8zjxfpuutpJFRnlM2h/giphy.gif",
     description: "Rapid-fire questions.",
     facts: "Tests quick thinking.",
     difficulties: ["Simple", "Tough"],
     knownFor: "Speed & accuracy",
   },
   Hangman: {
-    gradient: "from-blue-900 to-blue-700",
-    textColor: "text-blue-100",
-    gif: "https://media.giphy.com/media/l0MYt5jPRARvPnq92/giphy.gif",
+    textColor: "text-white",
+    gif: "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3ZmYTh6dDVsZGxuOXNtdmw4OXA5NXJ2aXM2bGMwdzJvamR3ZHZocSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0IxYKiysrhTdNkTS/giphy.gif",
     description: "Guess the word letter by letter.",
     facts: "Improves vocabulary.",
     difficulties: ["Easy", "Hard"],
     knownFor: "Addictive gameplay",
   },
   Millionaire: {
-    gradient: "from-purple-900 to-purple-700",
-    textColor: "text-purple-100",
-    gif: "https://media.giphy.com/media/3o6Zt6ML6BicZ3gL6M/giphy.gif",
+    textColor: "text-white",
+    gif: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGY5c2l6OXVnem53bnpvN3UyMjNhNDJ4OXFvOHo0em9nc2VvemltaiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/JOsFuMGjTxcMcSV3On/giphy.gif",
     description: "Answer trivia questions.",
     facts: "TV show format.",
     difficulties: ["Progressive", "Challenging"],
     knownFor: "Trivia & lifelines",
   },
   "Memory Match": {
-    gradient: "from-green-900 to-green-700",
-    textColor: "text-green-100",
+    textColor: "text-white",
     gif: "https://media.giphy.com/media/xT5LMWNFkMJiPjaMve/giphy.gif",
     description: "Match pairs of cards.",
     facts: "Boosts memory skills.",
@@ -69,7 +66,6 @@ const GAMES: Record<string, GameInfo> = {
   },
 };
 
-// New GameCard component to encapsulate rendering logic
 function GameCard({
   title,
   game,
@@ -81,32 +77,44 @@ function GameCard({
 }) {
   return (
     <div
-      className={`interactive-card bg-gradient-to-br ${game.gradient} p-3 sm:p-4 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-300 cursor-pointer`}
+      className="interactive-card bg-black/50 p-4 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 cursor-pointer border border-gray-700/50 backdrop-blur-md hover:border-gray-600/50"
       onClick={onClick}
     >
-      <Image
-        src={game.gif}
-        alt={`${title} GIF`}
-        width={300}
-        height={128}
-        className="w-full h-32 object-cover rounded-t-lg mb-3"
-        unoptimized
-      />
-      <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
-      <p className={`${game.textColor} text-xs mb-1`}>
-        <span className="font-semibold text-yellow-300">Description:</span> {game.description}
-      </p>
-      <p className={`${game.textColor} text-xs mb-1`}>
-        <span className="font-semibold text-yellow-300">Facts:</span> {game.facts}
-      </p>
-      <p className={`${game.textColor} text-xs mb-1`}>
-        <span className="font-semibold text-yellow-300">Difficulties:</span>{" "}
-        <span className="text-green-400">{game.difficulties[0]}</span> to{" "}
-        <span className="text-red-400">{game.difficulties[1]}</span>
-      </p>
-      <p className={`${game.textColor} text-xs`}>
-        <span className="font-semibold text-yellow-300">Known For:</span> {game.knownFor}
-      </p>
+      {/* Image section with glass effect */}
+      <div className="relative h-32 rounded-t-lg overflow-hidden">
+        <Image
+          src={game.gif}
+          alt={`${title} GIF`}
+          width={300}
+          height={128}
+          className="w-full h-full object-cover"
+          unoptimized
+        />
+        {title === "Millionaire" && (
+          <div className="absolute top-2 left-2 bg-black/80 px-2 py-1 rounded-full text-xs text-white flex items-center gap-1">
+            {"🔥 People's Favorite"}
+          </div>
+        )}
+      </div>
+      
+      {/* Content section */}
+      <div className="pt-3">
+        <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
+        <p className="text-purple-200 text-xs mb-1">
+          <span className="font-semibold text-yellow-400">Description:</span> {game.description}
+        </p>
+        <p className="text-purple-200 text-xs mb-1">
+          <span className="font-semibold text-yellow-400">Facts:</span> {game.facts}
+        </p>
+        <p className="text-purple-200 text-xs mb-1">
+          <span className="font-semibold text-yellow-400">Difficulties:</span>{" "}
+          <span className="text-green-400">{game.difficulties[0]}</span> to{" "}
+          <span className="text-red-400">{game.difficulties[1]}</span>
+        </p>
+        <p className="text-white text-xs">
+          <span className="font-semibold text-yellow-400">Known For:</span> {game.knownFor}
+        </p>
+      </div>
     </div>
   );
 }
@@ -117,6 +125,7 @@ export default function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [hangmanQuiz, setHangmanQuiz] = useState<QuizQuestion[] | null>(null);
+  const [millionaireQuiz, setMillionaireQuiz] = useState<QuizQuestion[] | null>(null);
   const router = useRouter();
 
   const fetchSession = useCallback(async () => {
@@ -135,16 +144,28 @@ export default function Dashboard() {
     }
   }, [router]);
 
+  // Add this useEffect to call fetchSession when component mounts
   useEffect(() => {
     fetchSession();
   }, [fetchSession]);
 
+  // Game event listeners
   useEffect(() => {
     const handleLaunchHangman = (e: CustomEvent) => {
       setHangmanQuiz(e.detail);
     };
+    
+    const handleLaunchMillionaire = (e: CustomEvent) => {
+      setMillionaireQuiz(e.detail);
+    };
+    
     window.addEventListener("launchHangman", handleLaunchHangman as EventListener);
-    return () => window.removeEventListener("launchHangman", handleLaunchHangman as EventListener);
+    window.addEventListener("launchMillionaire", handleLaunchMillionaire as EventListener);
+    
+    return () => {
+      window.removeEventListener("launchHangman", handleLaunchHangman as EventListener);
+      window.removeEventListener("launchMillionaire", handleLaunchMillionaire as EventListener);
+    };
   }, []);
 
   const handleSignOut = useCallback(async () => {
@@ -234,7 +255,7 @@ export default function Dashboard() {
       )}
 
       {hangmanQuiz && <Hangman quizData={hangmanQuiz} onClose={() => setHangmanQuiz(null)} />}
-
+      {millionaireQuiz && <MillionaireGame quizData={millionaireQuiz} onClose={() => setMillionaireQuiz(null)} />}
       <div className="mt-6 text-center">
         <button onClick={handleSignOut} className="btn-primary text-sm sm:text-base">
           Sign Out

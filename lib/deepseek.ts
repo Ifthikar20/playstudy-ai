@@ -1,39 +1,16 @@
 import axios, { AxiosError } from "axios";
-import { GoogleGenerativeAI, GenerateContentResult } from "@google/generative-ai";
-
-// Define the chat session type
-interface ChatSession {
-  sendMessage(prompt: string): Promise<GenerateContentResult>;
-}
 
 interface DeepSeekResponse {
   choices: { message: { content: string } }[];
   usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
 }
 
-// Function to initialize Gemini chat session
-const initializeGeminiChatSession = (apiKey: string): ChatSession => {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  const geminiConfig = {
-    temperature: 1,
-    topP: 0.95,
-    topK: 40,
-    maxOutputTokens: 8192,
-    responseMimeType: "text/plain",
-  };
-  return geminiModel.startChat({
-    generationConfig: geminiConfig,
-    history: [],
-  });
-};
-
 export async function generateGameContent(gameTitle: string, inputText: string): Promise<string> {
   const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
   const DEEPSEEK_API_URL = process.env.DEEPSEEK_API_URL || "https://api.deepseek.com/v1/chat/completions";
-  const GEMINI_API_KEY = process.env.GOOGLE_GEMINI_API_KEY;
+  const GROK_API_KEY = process.env.GROK_API_KEY;
+  const GROK_API_URL = "https://api.x.ai/v1/chat/completions";
 
-  // Fixed prompt structure for all quizzes
   const prompt = `
 You are an AI that transforms educational content into interactive game formats. Transform the following text into a set of quiz questions for the game "${gameTitle}". Return the result as a JSON array in this exact format:
 
@@ -56,7 +33,7 @@ Input text:
 ${inputText}
 `;
 
-  // Try DeepSeek if available
+  // Try DeepSeek first
   if (DEEPSEEK_API_KEY) {
     try {
       console.log("Attempting DeepSeek API Call...");
@@ -91,26 +68,45 @@ ${inputText}
       });
     }
   } else {
-    console.log("No DEEPSEEK_API_KEY provided, falling back to Gemini");
+    console.log("No DEEPSEEK_API_KEY provided, falling back to Grok");
   }
 
-  // Fallback to Gemini
-  if (!GEMINI_API_KEY) {
-    throw new Error("GOOGLE_GEMINI_API_KEY is not set - required for operation");
+  // Fallback to Grok with grok-2-vision-1212
+  if (!GROK_API_KEY) {
+    throw new Error("GROK_API_KEY is not set - required for operation");
   }
 
   try {
-    console.log("Initializing Gemini API...");
-    const geminiChatSession = initializeGeminiChatSession(GEMINI_API_KEY);
-    console.log("Sending request to Gemini...");
-    const geminiResult = await geminiChatSession.sendMessage(prompt);
-    const geminiResponse = geminiResult.response.text();
-    console.log(`Gemini API Success: "${geminiResponse}"`);
-    return geminiResponse;
-  } catch (geminiError) {
-    console.error("Gemini API Error:", {
-      message: geminiError instanceof Error ? geminiError.message : "Unknown error",
+    console.log("Attempting Grok API Call with grok-2-vision-1212...");
+    const response = await axios.post(
+      GROK_API_URL,
+      {
+        model: "grok-2-vision-1212", // Explicitly using grok-2-vision-1212
+        messages: [
+          { role: "system", content: "You are an AI that transforms educational content into interactive game formats." },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 1000,
+        stream: false,
+      },
+      {
+        headers: {
+          "Authorization": `Bearer ${GROK_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const grokContent = response.data.choices[0].message.content;
+    console.log(`Grok API Success: "${grokContent}"`);
+    return grokContent;
+  } catch (grokError) {
+    const isAxiosError = grokError instanceof AxiosError;
+    console.error("Grok API Error:", {
+      message: grokError instanceof Error ? grokError.message : "Unknown error",
+      status: isAxiosError ? grokError.response?.status : undefined,
+      data: isAxiosError ? grokError.response?.data : undefined,
     });
-    throw new Error("Failed to generate content with Gemini API");
+    throw new Error("Failed to generate content with Grok API (grok-2-vision-1212)");
   }
 }
