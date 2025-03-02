@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Clock, Zap, Award, AlertTriangle, X, Check, ChevronRight } from "lucide-react";
+import { Clock, Zap, Award, X, Check, ChevronRight } from "lucide-react"; // Removed AlertTriangle
 import { useGameContext } from "@/app/dashboard/_components/GameContext";
 
 interface QuizQuestion {
@@ -26,7 +26,7 @@ const TIMER_OPTIONS = [
   { label: "20 min", value: 1200 },
   { label: "30 min", value: 1800 },
   { label: "1 hr", value: 3600 },
-  { label: "3 hr", value: 10800 }
+  { label: "3 hr", value: 10800 },
 ];
 
 export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps) {
@@ -45,7 +45,7 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
     incorrect: 0,
     timeBonus: 0,
     streakBonus: 0,
-    finalScore: 0
+    finalScore: 0,
   });
 
   // Format time
@@ -53,19 +53,44 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hrs > 0) {
-      return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      return `${hrs}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     }
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   }, []);
+
+  // End the game
+  const endGame = useCallback(() => {
+    setGameOver(true);
+
+    // Calculate final stats
+    const timeBonus = timeRemaining ? Math.floor(timeRemaining / 10) : 0;
+    const streakBonus = Math.floor(streak * 5);
+    const finalScore = score + timeBonus + streakBonus;
+
+    setGameStats({
+      correct: gameStats.correct,
+      incorrect: gameStats.incorrect,
+      timeBonus,
+      streakBonus,
+      finalScore,
+    });
+
+    // Update global game state
+    setGameState({
+      winnings: `$${finalScore}`,
+      xp: gameState.xp + finalScore,
+      gameOver: true,
+    });
+  }, [gameStats, score, setGameState, streak, timeRemaining, gameState.xp]);
 
   // Timer effect
   useEffect(() => {
     if (!gameStarted || timeRemaining === null) return;
-    
+
     const timer = setInterval(() => {
-      setTimeRemaining(prev => {
+      setTimeRemaining((prev) => {
         if (prev === null || prev <= 0) {
           clearInterval(timer);
           if (!gameOver) {
@@ -76,9 +101,9 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
         return prev - 1;
       });
     }, 1000);
-    
+
     return () => clearInterval(timer);
-  }, [gameStarted, timeRemaining]);
+  }, [gameStarted, timeRemaining, gameOver, endGame]); // Added gameOver and endGame to dependencies
 
   // Start the game
   const startGame = () => {
@@ -93,32 +118,7 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
       incorrect: 0,
       timeBonus: 0,
       streakBonus: 0,
-      finalScore: 0
-    });
-  };
-
-  // End the game
-  const endGame = () => {
-    setGameOver(true);
-    
-    // Calculate final stats
-    const timeBonus = timeRemaining ? Math.floor(timeRemaining / 10) : 0;
-    const streakBonus = Math.floor(streak * 5);
-    const finalScore = score + timeBonus + streakBonus;
-    
-    setGameStats({
-      correct: gameStats.correct,
-      incorrect: gameStats.incorrect,
-      timeBonus,
-      streakBonus,
-      finalScore
-    });
-    
-    // Update global game state
-    setGameState({
-      winnings: `$${finalScore}`,
-      xp: gameState.xp + finalScore,
-      gameOver: true
+      finalScore: 0,
     });
   };
 
@@ -131,37 +131,37 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
   // Submit the selected answer
   const handleSubmitAnswer = () => {
     if (!selectedAnswer || answerSubmitted) return;
-    
+
     const currentQuestion = quizData[currentQuestionIndex];
     const isCorrect = selectedAnswer === currentQuestion.correct_answer;
-    
+
     if (isCorrect) {
       // Calculate points based on difficulty
       const difficultyMultiplier = currentQuestion.difficulty === "Easy" ? 10 : 20;
       const questionScore = difficultyMultiplier;
-      
+
       // Update score and stats
-      setScore(prev => prev + questionScore);
-      setStreak(prev => prev + 1);
-      setGameStats(prev => ({
+      setScore((prev) => prev + questionScore);
+      setStreak((prev) => prev + 1);
+      setGameStats((prev) => ({
         ...prev,
-        correct: prev.correct + 1
+        correct: prev.correct + 1,
       }));
     } else {
       // Reset streak on wrong answer
       setStreak(0);
-      setGameStats(prev => ({
+      setGameStats((prev) => ({
         ...prev,
-        incorrect: prev.incorrect + 1
+        incorrect: prev.incorrect + 1,
       }));
     }
-    
+
     setAnswerSubmitted(true);
-    
+
     // Move to next question after a short delay
     setTimeout(() => {
       if (currentQuestionIndex < quizData.length - 1) {
-        setCurrentQuestionIndex(prev => prev + 1);
+        setCurrentQuestionIndex((prev) => prev + 1);
         setSelectedAnswer(null);
         setAnswerSubmitted(false);
       } else {
@@ -186,7 +186,7 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
       incorrect: 0,
       timeBonus: 0,
       streakBonus: 0,
-      finalScore: 0
+      finalScore: 0,
     });
   };
 
@@ -210,7 +210,7 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
             <h2 className="text-3xl font-bold text-white bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
               Quick Quiz Challenge
             </h2>
-            <button 
+            <button
               onClick={onClose}
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors"
             >
@@ -225,7 +225,7 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
                 <Clock className="h-5 w-5 mr-2 text-purple-400" />
                 Select Quiz Timer
               </h3>
-              
+
               <div className="grid grid-cols-3 gap-3 mb-6">
                 {TIMER_OPTIONS.map((option) => (
                   <button
@@ -241,7 +241,7 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
                   </button>
                 ))}
               </div>
-              
+
               <div className="bg-gray-700/50 p-4 rounded-lg mb-6">
                 <p className="text-sm text-gray-300 mb-2">
                   <Zap className="h-4 w-4 inline-block mr-1 text-yellow-400" />
@@ -255,7 +255,7 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
                   <li>Challenge yourself to beat your high score!</li>
                 </ul>
               </div>
-              
+
               <button
                 onClick={startGame}
                 disabled={selectedTimer === null}
@@ -275,12 +275,12 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
               <h3 className="text-3xl font-bold mb-6 text-purple-400">
                 Challenge Complete! 🏆
               </h3>
-              
+
               <div className="bg-gray-800/80 p-6 rounded-lg mb-6">
                 <p className="text-xl text-white mb-4">
                   Final Score: <span className="text-yellow-300 font-bold">{gameStats.finalScore} points</span>
                 </p>
-                
+
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="bg-gray-700/50 p-3 rounded-lg">
                     <p className="text-green-400 font-semibold">Correct Answers</p>
@@ -300,7 +300,7 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex gap-4 justify-center">
                 <button
                   onClick={resetGame}
@@ -323,9 +323,11 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
               <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center bg-gray-800/80 px-4 py-2 rounded-lg">
                   <Clock className="h-5 w-5 mr-2 text-purple-400" />
-                  <span className={`font-mono text-lg font-bold ${
-                    timeRemaining && timeRemaining < 30 ? "text-red-400 animate-pulse" : "text-white"
-                  }`}>
+                  <span
+                    className={`font-mono text-lg font-bold ${
+                      timeRemaining && timeRemaining < 30 ? "text-red-400 animate-pulse" : "text-white"
+                    }`}
+                  >
                     {timeRemaining !== null ? formatTime(timeRemaining) : "00:00"}
                   </span>
                 </div>
@@ -345,7 +347,7 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
 
               {/* Question progress */}
               <div className="w-full bg-gray-800 h-2 rounded-full mb-6 overflow-hidden">
-                <div 
+                <div
                   className="bg-gradient-to-r from-purple-500 to-pink-500 h-full"
                   style={{ width: `${((currentQuestionIndex + 1) / quizData.length) * 100}%` }}
                 ></div>
@@ -354,11 +356,18 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
               {/* Current question */}
               <div className="bg-gradient-to-r from-purple-600/30 to-pink-600/30 p-4 rounded-lg mb-6 shadow-lg">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-purple-300">Question {currentQuestionIndex + 1} of {quizData.length}</span>
+                  <span className="text-purple-300">
+                    Question {currentQuestionIndex + 1} of {quizData.length}
+                  </span>
                   <span className="text-green-300">
-                    Difficulty: <span className={quizData[currentQuestionIndex].difficulty === "Easy" 
-                      ? "text-green-400" 
-                      : "text-yellow-400"}>
+                    Difficulty:{" "}
+                    <span
+                      className={
+                        quizData[currentQuestionIndex].difficulty === "Easy"
+                          ? "text-green-400"
+                          : "text-yellow-400"
+                      }
+                    >
                       {quizData[currentQuestionIndex].difficulty}
                     </span>
                   </span>
@@ -381,20 +390,21 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
                           ? "bg-green-600 border-2 border-green-400" // Correct answer
                           : selectedAnswer === answer
                             ? "bg-red-600 border-2 border-red-400" // Selected wrong answer
-                            : "bg-gray-700 opacity-70"  // Other answers when submitted
+                            : "bg-gray-700 opacity-70" // Other answers when submitted
                         : selectedAnswer === answer
                           ? "bg-purple-600 border-2 border-purple-400" // Selected answer
                           : "bg-gray-700 hover:bg-gray-600" // Unselected answer
                     }`}
                   >
                     <div className="flex items-center">
-                      {answerSubmitted && (
-                        answer === quizData[currentQuestionIndex].correct_answer
-                          ? <Check className="h-5 w-5 mr-2 text-green-300" />
-                          : selectedAnswer === answer
-                            ? <X className="h-5 w-5 mr-2 text-red-300" />
-                            : <span className="w-5 mr-2"></span>
-                      )}
+                      {answerSubmitted &&
+                        (answer === quizData[currentQuestionIndex].correct_answer ? (
+                          <Check className="h-5 w-5 mr-2 text-green-300" />
+                        ) : selectedAnswer === answer ? (
+                          <X className="h-5 w-5 mr-2 text-red-300" />
+                        ) : (
+                          <span className="w-5 mr-2"></span>
+                        ))}
                       <span>{answer}</span>
                     </div>
                   </button>
@@ -407,24 +417,23 @@ export default function QuickQuizGame({ quizData, onClose }: QuickQuizGameProps)
                   onClick={handleSubmitAnswer}
                   disabled={!selectedAnswer}
                   className={`w-full py-3 rounded-lg text-white font-bold ${
-                    selectedAnswer
-                      ? "bg-purple-600 hover:bg-purple-700"
-                      : "bg-gray-600 cursor-not-allowed"
+                    selectedAnswer ? "bg-purple-600 hover:bg-purple-700" : "bg-gray-600 cursor-not-allowed"
                   }`}
                 >
                   Submit Answer
                 </button>
               ) : (
                 <div className="text-center">
-                  <p className={`text-lg font-semibold mb-3 ${
-                    selectedAnswer === quizData[currentQuestionIndex].correct_answer
-                      ? "text-green-400"
-                      : "text-red-400"
-                  }`}>
+                  <p
+                    className={`text-lg font-semibold mb-3 ${
+                      selectedAnswer === quizData[currentQuestionIndex].correct_answer
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
                     {selectedAnswer === quizData[currentQuestionIndex].correct_answer
                       ? "Correct! ✓"
-                      : "Incorrect! ✗"
-                    }
+                      : "Incorrect! ✗"}
                   </p>
                   <div className="animate-pulse">
                     <ChevronRight className="h-6 w-6 mx-auto text-white" />

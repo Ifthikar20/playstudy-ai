@@ -530,49 +530,49 @@ export default function Page() {
           
           {/* Footer */}
           <footer className="bg-black text-white py-12">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Our Mission */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 text-purple-500">
-                    Our Mission
-                  </h3>
-                  <p className="text-sm">
-                    At PlayStudy.AI, we're on a quest to revolutionize learning by turning mundane study sessions into electrifying game experiences. We believe education should spark joy, ignite curiosity, and stick with you—because why just study when you can play?
-                  </p>
-                </div>
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Our Mission */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4 text-purple-500">
+          Our Mission
+        </h3>
+        <p className="text-sm">
+          At PlayStudy.AI, {"we're"} on a quest to revolutionize learning by turning mundane study sessions into electrifying game experiences. We believe education should spark joy, ignite curiosity, and stick with you—because why just study when you can play?
+        </p>
+      </div>
 
-                {/* Policy and Conduct */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 text-purple-500">
-                    Policy and Conduct
-                  </h3>
-                  <p className="text-sm">
-                    We're committed to creating a fun, fair, and respectful community. Our policies ensure a safe space for all players—cheating's out, creativity's in. Check out our full guidelines for the rules of the game.
-                  </p>
-                  <Link href="/policy" className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block transition-colors">
-                    Read More
-                  </Link>
-                </div>
+      {/* Policy and Conduct */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4 text-purple-500">
+          Policy and Conduct
+        </h3>
+        <p className="text-sm">
+          {"We're"} committed to creating a fun, fair, and respectful community. Our policies ensure a safe space for all players—{"cheating's"} out, {"creativity's"} in. Check out our full guidelines for the rules of the game.
+        </p>
+        <Link href="/policy" className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block transition-colors">
+          Read More
+        </Link>
+      </div>
 
-                {/* Learn About Refund */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-4 text-purple-500">
-                    Learn About Refund
-                  </h3>
-                  <p className="text-sm">
-                    Changed your mind? We've got you covered with a straightforward refund process. Dive into the details to see how we keep things hassle-free and player-friendly.
-                  </p>
-                  <Link href="/refunds" className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block transition-colors">
-                    Learn More
-                  </Link>
-                </div>
-              </div>
-              <div className="mt-8 text-center text-sm text-gray-400">
-                &copy; 2025 PlayStudy.AI. All rights reserved. test
-              </div>
-            </div>
-          </footer>
+      {/* Learn About Refund */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4 text-purple-500">
+          Learn About Refund
+        </h3>
+        <p className="text-sm">
+          Changed your mind? {"We've"} got you covered with a straightforward refund process. Dive into the details to see how we keep things hassle-free and player-friendly.
+        </p>
+        <Link href="/refunds" className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block transition-colors">
+          Learn More
+        </Link>
+      </div>
+    </div>
+    <div className="mt-8 text-center text-sm text-gray-400">
+      © 2025 PlayStudy.AI. All rights reserved. test
+    </div>
+  </div>
+</footer>
         </div>
 
         <div className="absolute top-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full filter blur-3xl animate-pulse-slow"></div>
