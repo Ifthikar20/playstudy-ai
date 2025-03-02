@@ -5,9 +5,9 @@ import { useState, useRef, useEffect } from "react";
 interface GameModalProps {
   gameTitle: string;
   onClose: () => void;
-  onSaveToNote?: (content: string) => void; // New prop for saving to note
-  initialContent?: string; // Optional initial content
-  hideNoteButton?: boolean; // Optional prop to hide the Save to Note button
+  onSaveToNote?: (content: string) => void;
+  initialContent?: string;
+  hideNoteButton?: boolean;
 }
 
 export default function GameModal({ 
@@ -35,71 +35,74 @@ export default function GameModal({
     }
   }, [inputText, isExpanded]);
 
- // Find this code in your handleBeautify function
-const handleBeautify = () => {
-  try {
-    // Split into paragraphs based on double newlines or single newlines
-    const paragraphs = inputText
-      .split(/\n\s*\n|\n/)
-      .map(p => p.trim())
-      .filter(p => p.length > 0);
+  // Find this code in your handleBeautify function
+  const handleBeautify = () => {
+    try {
+      // Split into paragraphs based on double newlines or single newlines
+      const paragraphs = inputText
+        .split(/\n\s*\n|\n/)
+        .map(p => p.trim())
+        .filter(p => p.length > 0);
 
-    // Format paragraphs with proper spacing and indentation
-    const formattedText = paragraphs
-      .map((para) => {
-        // Detect lists or keep as paragraph
-        if (para.match(/^-|\*|\d+\./)) {
-          const lines = para.split("\n").map(line => line.trim()); // Change 'let' to 'const'
-          return lines
-            .map(line => { // Change 'let' to 'const'
-              if (line.startsWith("-") || line.startsWith("*")) {
-                return `  • ${line.slice(1).trim()}`; // Indented bullet
-              }
-              return `  ${line}`; // Indented line
-            })
-            .join("\n");
-        }
-        return `${para}`; // Plain paragraph
-      })
-      .join("\n\n"); // Consistent double newline between paragraphs
+      // Format paragraphs with proper spacing and indentation
+      const formattedText = paragraphs
+        .map((para) => {
+          // Detect lists or keep as paragraph
+          if (para.match(/^-|\*|\d+\./)) {
+            const lines = para.split("\n").map(line => line.trim());
+            return lines
+              .map(line => {
+                if (line.startsWith("-") || line.startsWith("*")) {
+                  return `  • ${line.slice(1).trim()}`; // Indented bullet
+                }
+                return `  ${line}`; // Indented line
+              })
+              .join("\n");
+          }
+          return `${para}`; // Plain paragraph
+        })
+        .join("\n\n"); // Consistent double newline between paragraphs
 
-    setInputText(formattedText);
-  } catch (error) {
-    console.error("Error beautifying text:", error);
-    alert("Failed to beautify text. Please check your input.");
-  }
-};
-
-// In GameModal.tsx
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsSubmitting(true);
-
-  try {
-    const response = await fetch("/api/convert-to-quiz", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: inputText, game: gameTitle }),
-    });
-
-    if (!response.ok) throw new Error("Failed to process input");
-
-    const quizData = await response.json();
-
-    if (gameTitle === "Hangman") {
-      window.dispatchEvent(new CustomEvent("launchHangman", { detail: quizData }));
-      onClose();
-    } else if (gameTitle === "Millionaire") {
-      window.dispatchEvent(new CustomEvent("launchMillionaire", { detail: quizData }));
-      onClose();
+      setInputText(formattedText);
+    } catch (error) {
+      console.error("Error beautifying text:", error);
+      alert("Failed to beautify text. Please check your input.");
     }
-  } catch (error) {
-    console.error("Error submitting input:", error);
-    alert("Failed to process input. Please try again.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
+
+  // In GameModal.tsx
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/convert-to-quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: inputText, game: gameTitle }),
+      });
+
+      if (!response.ok) throw new Error("Failed to process input");
+
+      const quizData = await response.json();
+
+      if (gameTitle === "Hangman") {
+        window.dispatchEvent(new CustomEvent("launchHangman", { detail: quizData }));
+        onClose();
+      } else if (gameTitle === "Millionaire") {
+        window.dispatchEvent(new CustomEvent("launchMillionaire", { detail: quizData }));
+        onClose();
+      } else if (gameTitle === "Quick Quiz") {
+        window.dispatchEvent(new CustomEvent("launchQuickQuiz", { detail: quizData }));
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error submitting input:", error);
+      alert("Failed to process input. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   
   // Default save to note handler if none provided
   const defaultSaveToNote = () => {
