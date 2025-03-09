@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from 'next/dynamic';
 import Image from "next/image";
-import { Brain, Gamepad, Book } from "lucide-react";
+import { Brain, Gamepad, Book, FileText, PenLine, Upload, ArrowRight } from "lucide-react";
 import GameModal from "@/app/dashboard/_components/GameModal";
 
 const Hangman = dynamic(
@@ -37,6 +37,13 @@ interface User {
   email: string;
   image: string | null;
 }
+
+// interface NoteTemplate {
+//   id: string;
+//   name: string;
+//   description: string;
+//   icon: string;
+// }
 
 interface QuizQuestion {
   question: string;
@@ -153,7 +160,7 @@ function GameCard({
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
-  const [activeSection, setActiveSection] = useState<"active" | "game" | null>(null);
+  const [activeSection, setActiveSection] = useState<"active" | "game" | "note" | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [hangmanQuiz, setHangmanQuiz] = useState<QuizQuestion[] | null>(null);
@@ -183,42 +190,28 @@ export default function Dashboard() {
   useEffect(() => {
     fetchSession();
   }, [fetchSession]);
-// Game event listeners
-useEffect(() => {
-  const handleLaunchHangman = (e: CustomEvent) => setHangmanQuiz(e.detail);
-  const handleLaunchMillionaire = (e: CustomEvent) => setMillionaireQuiz(e.detail);
-  const handleLaunchQuickQuiz = (e: CustomEvent) => setQuickQuizData(e.detail);
-  const handleLaunchMemoryMatch = (e: CustomEvent) => setMemoryMatchQuiz(e.detail);
-  const handleLaunchCrossWord = (e: CustomEvent) => setCrossWordQuiz(e.detail); // Added for CrossWord
+  
+  // Game event listeners
+  useEffect(() => {
+    const handleLaunchHangman = (e: CustomEvent) => setHangmanQuiz(e.detail);
+    const handleLaunchMillionaire = (e: CustomEvent) => setMillionaireQuiz(e.detail);
+    const handleLaunchQuickQuiz = (e: CustomEvent) => setQuickQuizData(e.detail);
+    const handleLaunchMemoryMatch = (e: CustomEvent) => setMemoryMatchQuiz(e.detail);
+    const handleLaunchCrossWord = (e: CustomEvent) => setCrossWordQuiz(e.detail); // Added for CrossWord
 
-  window.addEventListener("launchHangman", handleLaunchHangman as EventListener);
-  window.addEventListener("launchMillionaire", handleLaunchMillionaire as EventListener);
-  window.addEventListener("launchQuickQuiz", handleLaunchQuickQuiz as EventListener);
-  window.addEventListener("launchMemoryMatch", handleLaunchMemoryMatch as EventListener);
-  window.addEventListener("launchCrossWord", handleLaunchCrossWord as EventListener); // Added listener
+    window.addEventListener("launchHangman", handleLaunchHangman as EventListener);
+    window.addEventListener("launchMillionaire", handleLaunchMillionaire as EventListener);
+    window.addEventListener("launchQuickQuiz", handleLaunchQuickQuiz as EventListener);
+    window.addEventListener("launchMemoryMatch", handleLaunchMemoryMatch as EventListener);
+    window.addEventListener("launchCrossWord", handleLaunchCrossWord as EventListener); // Added listener
 
-  return () => {
-    window.removeEventListener("launchHangman", handleLaunchHangman as EventListener);
-    window.removeEventListener("launchMillionaire", handleLaunchMillionaire as EventListener);
-    window.removeEventListener("launchQuickQuiz", handleLaunchQuickQuiz as EventListener);
-    window.removeEventListener("launchMemoryMatch", handleLaunchMemoryMatch as EventListener);
-    window.removeEventListener("launchCrossWord", handleLaunchCrossWord as EventListener); // Added cleanup
-  };
-}, []);
-
-
-  const handleSignOut = useCallback(async () => {
-    try {
-      const response = await fetch("/api/auth/signout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!response.ok) throw new Error("Sign out failed");
-      const { redirectUrl } = await response.json();
-      window.location.href = redirectUrl;
-    } catch (error) {
-      console.error("Sign out failed:", error);
-    }
+    return () => {
+      window.removeEventListener("launchHangman", handleLaunchHangman as EventListener);
+      window.removeEventListener("launchMillionaire", handleLaunchMillionaire as EventListener);
+      window.removeEventListener("launchQuickQuiz", handleLaunchQuickQuiz as EventListener);
+      window.removeEventListener("launchMemoryMatch", handleLaunchMemoryMatch as EventListener);
+      window.removeEventListener("launchCrossWord", handleLaunchCrossWord as EventListener); // Added cleanup
+    };
   }, []);
 
   const handleGameClick = useCallback((gameTitle: string) => {
@@ -255,7 +248,10 @@ useEffect(() => {
           <p className="text-gray-400 text-xs">Turn subjects into fun, AI-powered games.</p>
         </div>
 
-        <div className="card-hover p-3 sm:p-4">
+        <div 
+          className="card-hover p-3 sm:p-4 cursor-pointer transition-colors duration-200 hover:bg-purple-900"
+          onClick={() => setActiveSection(activeSection === "note" ? null : "note")}
+        >
           <div className="flex items-center gap-3 mb-2">
             <Book className="h-6 w-6 text-purple-500" />
             <h2 className="text-lg font-semibold text-[var(--foreground)]">Note Transformation</h2>
@@ -289,22 +285,85 @@ useEffect(() => {
         </div>
       )}
 
+      {activeSection === "note" && (
+        <div className="mt-6">
+          <div className="bg-black/50 p-6 rounded-xl border border-gray-700/50 backdrop-blur-md">
+            <h3 className="text-xl font-bold text-white mb-4">Transform Your Notes</h3>
+            
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <Upload className="h-5 w-5 text-purple-400" />
+                <h4 className="text-lg font-semibold text-purple-200">Upload Your Notes</h4>
+              </div>
+              <div className="ml-8">
+                <div className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-purple-500 transition-colors">
+                  <FileText className="h-10 w-10 mx-auto mb-2 text-gray-400" />
+                  <p className="text-gray-300 mb-2">Drag & drop your files here</p>
+                  <p className="text-gray-400 text-xs mb-3">Supported formats: PDF, DOCX, TXT, MD</p>
+                  <button className="btn-secondary text-sm">Browse Files</button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-3">
+                <PenLine className="h-5 w-5 text-purple-400" />
+                <h4 className="text-lg font-semibold text-purple-200">Or Write/Paste Your Content</h4>
+              </div>
+              <div className="ml-8">
+                <textarea 
+                  className="w-full h-32 bg-gray-800/70 border border-gray-700 rounded-lg p-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="Type or paste your notes here..."
+                ></textarea>
+              </div>
+            </div>
+
+           
+
+            <div className="flex justify-end">
+              <button className="btn-primary flex items-center gap-2">
+                Transform Now
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isModalOpen && selectedGame && (
         <GameModal gameTitle={selectedGame} onClose={() => setIsModalOpen(false)} />
       )}
 
       {hangmanQuiz && <Hangman quizData={hangmanQuiz} onClose={() => setHangmanQuiz(null)} />}
       {millionaireQuiz && <MillionaireGame quizData={millionaireQuiz} onClose={() => setMillionaireQuiz(null)} />}
-        {/* Quick Quiz Game */}
       {quickQuizData && <QuickQuizGame quizData={quickQuizData} onClose={() => setQuickQuizData(null)} />}
       {memoryMatchQuiz && (
         <MemoryMatchGame quizData={memoryMatchQuiz} onClose={() => setMemoryMatchQuiz(null)} />
       )}
       {crossWordQuiz && <CrossWordGame quizData={crossWordQuiz} onClose={() => setCrossWordQuiz(null)} />}
-      <div className="mt-6 text-center">
-        <button onClick={handleSignOut} className="btn-primary text-sm sm:text-base">
-          Sign Out
-        </button>
+      
+      {/* Today's Challenge Section */}
+      <div className="mt-10 mb-6">
+        <h2 className="text-xl font-bold text-white mb-4"> Challenge for You</h2>
+        <div className="bg-black/50 p-6 rounded-xl border border-gray-700/50 backdrop-blur-md">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-purple-200 mb-2">Coming Soon!</h3>
+              <p className="text-gray-300 text-sm">
+                Daily personalized challenges based on your learning patterns will appear here.
+              </p>
+            </div>
+            <div className="bg-purple-800/40 p-3 rounded-lg">
+              <div className="text-yellow-400 text-4xl">🏆</div>
+            </div>
+          </div>
+          <div className="mt-4 pt-4 border-t border-gray-700/50">
+            <p className="text-gray-400 text-xs">
+              Stay tuned for personalized daily challenges that will help reinforce your learning
+              and test your knowledge in fun, engaging ways.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

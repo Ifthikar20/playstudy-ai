@@ -25,7 +25,10 @@ export async function getUserSession(): Promise<UserSession | null> {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('auth-token')?.value;
-    if (!token) return null;
+    if (!token) {
+      console.log('No auth-token found in cookies');
+      return null;
+    }
 
     const verified = await jwtVerify(token, JWT_SECRET);
     const payload = verified.payload as JWTPayload;
@@ -34,9 +37,7 @@ export async function getUserSession(): Promise<UserSession | null> {
       console.error('Invalid session payload:', payload);
       return null;
     }
-    //  
-    
-    // Create a new session object with default values for optional fields
+
     const session: UserSession = {
       id: payload.id,
       email: payload.email,
@@ -52,6 +53,7 @@ export async function getUserSession(): Promise<UserSession | null> {
 }
 
 export async function createSession(user: UserSession) {
+  const expiresInSeconds = 60; // 60 seconds
   const token = await new SignJWT({
     id: user.id,
     email: user.email,
@@ -59,7 +61,7 @@ export async function createSession(user: UserSession) {
     image: user.image,
   })
     .setProtectedHeader({ alg: 'HS256' })
-    .setExpirationTime('1d')
+    .setExpirationTime(`${expiresInSeconds}s`) // Align JWT expiration with cookie
     .sign(JWT_SECRET);
 
   const cookieStore = await cookies();
@@ -67,11 +69,12 @@ export async function createSession(user: UserSession) {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    expires: new Date(Date.now() + 60 * 1000), // 60 seconds
+    expires: new Date(Date.now() + expiresInSeconds * 1000), // 60 seconds
   });
 
   return token;
 }
+
 function isValidSession(payload: JWTPayload): payload is JWTPayload & Required<Pick<JWTPayload, 'id' | 'email'>> {
   return (
     typeof payload === 'object' &&
