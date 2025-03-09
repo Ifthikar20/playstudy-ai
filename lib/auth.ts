@@ -34,7 +34,8 @@ export async function getUserSession(): Promise<UserSession | null> {
       console.error('Invalid session payload:', payload);
       return null;
     }
-
+    //  
+    
     // Create a new session object with default values for optional fields
     const session: UserSession = {
       id: payload.id,

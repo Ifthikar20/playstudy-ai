@@ -194,7 +194,7 @@ export default function MemoryMatchGame({ quizData, onClose }: MemoryMatchGamePr
                 width={200}
                 height={200}
                 className="mx-auto mb-4 animate-bounce"
-                unoptimized
+                loading="lazy" 
               />
               <h3 className="text-xl font-bold text-purple-400 mb-2">You Won!</h3>
               <p className="text-gray-300 mb-4">Completed in {moves} moves</p>
