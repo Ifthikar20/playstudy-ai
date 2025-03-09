@@ -60,6 +60,7 @@ jobs:
                 -e DEEPSEEK_API_URL="${{ secrets.DEEPSEEK_API_URL }}" \
                 -e GOOGLE_GEMINI_API_KEY="${{ secrets.GOOGLE_GEMINI_API_KEY }}" \
                 -e GROK_API_KEY="${{ secrets.GROK_API_KEY }}" \
+                -e REDIS_URL="${{ secrets.REDIS_URL }}" \
                 -p 3000:3000 \
                 playstudy-ai
               echo "Cleaning up old images..."

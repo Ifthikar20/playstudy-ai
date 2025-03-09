@@ -259,7 +259,7 @@ export default function Page() {
                 width={1280}
                 height={720}
                 className="w-full h-full object-cover"
-                unoptimized
+                loading="lazy" 
               />
             </div>
           </div>
@@ -367,7 +367,7 @@ export default function Page() {
                   width={300}
                   height={128}
                   className="w-full h-32 object-cover rounded-t-lg mb-3 border border-purple-500/50"
-                  unoptimized
+                  loading="lazy" 
                 />
                 <h3 className="text-lg font-bold text-[var(--foreground)] mb-2 text-purple-300">Quick Quiz</h3>
                 <p className="text-purple-100 text-xs mb-1">
@@ -430,7 +430,7 @@ export default function Page() {
                     width={300}
                     height={128}
                     className="w-full h-32 object-cover rounded-t-lg mb-3 border border-purple-500/50"
-                    unoptimized
+                    loading="lazy" 
                   />
                   <h3 className="text-lg font-bold text-[var(--foreground)] mb-2 text-purple-300">{gameTitle}</h3>
                   <p className={`${game.textColor} text-xs mb-1`}>
@@ -467,7 +467,7 @@ export default function Page() {
                     width={300}
                     height={128}
                     className="w-full h-32 object-cover rounded-t-lg mb-3 border border-purple-500/50"
-                    unoptimized
+                    loading="lazy" 
                   />
                   <h3 className="text-lg font-bold text-[var(--foreground)] mb-2 text-purple-300">{gameTitle}</h3>
                   <p className={`${game.textColor} text-xs mb-1`}>
@@ -515,6 +515,7 @@ export default function Page() {
                       width={48}
                       height={48}
                       className="rounded-full mr-3"
+                      loading="lazy" 
                     />
                     <div>
                       <p className="font-semibold text-purple-400">{student.name}</p>

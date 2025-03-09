@@ -1,7 +1,36 @@
-// app/dashboard/_components/GameModal.tsx
-"use client";
+"use client"; // Directive at the top
 
-import { useState, useRef, useEffect } from "react";
+import React, { 
+  useState, 
+  useRef, 
+  useEffect, 
+  useCallback, 
+  useMemo 
+} from "react";
+
+// Custom Debounce Utility with proper typing
+function debounce<F extends (...args: string[]) => void>(
+  func: F, 
+  delay: number
+): (...args: Parameters<F>) => void {
+  let timeoutId: NodeJS.Timeout;
+  
+  return (...args: Parameters<F>) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+}
+
+// Constants for better maintainability
+const MAX_INPUT_LENGTH = 50000;
+const MAX_TEXTAREA_HEIGHT = 800;
+const DISPATCH_EVENTS = {
+  "Hangman": "launchHangman",
+  "Millionaire": "launchMillionaire",
+  "Quick Quiz": "launchQuickQuiz",
+  "Memory Match": "launchMemoryMatch",
+  "CrossWord": "launchCrossWord"
+} as const;
 
 interface GameModalProps {
   gameTitle: string;
@@ -23,57 +52,49 @@ export default function GameModal({
   const [isExpanded, setIsExpanded] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Adjust textarea height dynamically
+  // Effect for textarea height adjustment (inlined adjustTextareaHeight)
   useEffect(() => {
     const textarea = textareaRef.current;
-    if (textarea) {
-      if (isExpanded) {
-        textarea.style.height = "100%"; // Full height in expanded mode
-      } else {
-        textarea.style.height = "auto"; // Reset height
-        textarea.style.height = `${Math.min(textarea.scrollHeight, 500)}px`; // Increased from 400px to 500px
-      }
-    }
-  }, [inputText, isExpanded]);
+    if (!textarea) return;
 
-  // Find this code in your handleBeautify function
-  const handleBeautify = () => {
+    textarea.style.height = isExpanded 
+      ? "100%" 
+      : `${Math.min(textarea.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`;
+  }, [inputText, isExpanded]); // Dependencies: inputText, isExpanded
+
+  // Debounced input text change handler
+  const debouncedSetInputText = useCallback(
+    (text: string) => {
+      const debouncedFn = debounce((value: string) => {
+        setInputText(value);
+      }, 300);
+      debouncedFn(text);
+    },
+    []
+  );
+
+  // Optimized beautification logic
+  const handleBeautify = useCallback(() => {
+    if (!inputText) return;
+
     try {
-      // Split into paragraphs based on double newlines or single newlines
-      const paragraphs = inputText
-        .split(/\n\s*\n|\n/)
-        .map(p => p.trim())
-        .filter(p => p.length > 0);
-
-      // Format paragraphs with proper spacing and indentation
-      const formattedText = paragraphs
-        .map((para) => {
-          // Detect lists or keep as paragraph
-          if (para.match(/^-|\*|\d+\./)) {
-            const lines = para.split("\n").map(line => line.trim());
-            return lines
-              .map(line => {
-                if (line.startsWith("-") || line.startsWith("*")) {
-                  return `  • ${line.slice(1).trim()}`; // Indented bullet
-                }
-                return `  ${line}`; // Indented line
-              })
-              .join("\n");
-          }
-          return `${para}`; // Plain paragraph
-        })
-        .join("\n\n"); // Consistent double newline between paragraphs
-
-      setInputText(formattedText);
+      const beautifiedText = transformText(inputText);
+      setInputText(beautifiedText);
     } catch (error) {
-      console.error("Error beautifying text:", error);
-      alert("Failed to beautify text. Please check your input.");
+      console.error("Beautification error:", error);
+      alert("Text beautification failed.");
     }
-  };
+  }, [inputText]);
 
-  // In GameModal.tsx
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Debounced submit to prevent rapid multiple submissions
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (inputText.length > MAX_INPUT_LENGTH) {
+      alert(`Input too large. Maximum ${MAX_INPUT_LENGTH} characters allowed.`);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -86,117 +107,109 @@ export default function GameModal({
       if (!response.ok) throw new Error("Failed to process input");
 
       const quizData = await response.json();
+      const eventName = DISPATCH_EVENTS[gameTitle as keyof typeof DISPATCH_EVENTS];
 
-      if (gameTitle === "Hangman") {
-        window.dispatchEvent(new CustomEvent("launchHangman", { detail: quizData }));
-        onClose();
-      } else if (gameTitle === "Millionaire") {
-        window.dispatchEvent(new CustomEvent("launchMillionaire", { detail: quizData }));
-        onClose();
-      } else if (gameTitle === "Quick Quiz") {
-        window.dispatchEvent(new CustomEvent("launchQuickQuiz", { detail: quizData }));
-        onClose();
-      } else if (gameTitle === "Memory Match") {
-        window.dispatchEvent(new CustomEvent("launchMemoryMatch", { detail: quizData }));
-        onClose();
-      } else if (gameTitle === "CrossWord") {
-        window.dispatchEvent(new CustomEvent("launchCrossWord", { detail: quizData }));
+      if (eventName) {
+        window.dispatchEvent(new CustomEvent(eventName, { detail: quizData }));
         onClose();
       }
     } catch (error) {
-      console.error("Error submitting input:", error);
+      console.error("Submission error:", error);
       alert("Failed to process input. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
-  };
-  
-  // Default save to note handler if none provided
-  const defaultSaveToNote = () => {
-    alert("This feature is not fully implemented yet. Your note would be saved here.");
-    onClose();
-  };
+  }, [inputText, gameTitle, onClose]);
 
-  // Handler for saving to note
-  const handleSaveToNote = () => {
-    if (onSaveToNote && inputText.trim()) {
-      onSaveToNote(inputText);
-    } else if (inputText.trim()) {
-      defaultSaveToNote();
+  // Memoized note saving handler
+  const handleSaveToNote = useCallback(() => {
+    const trimmedText = inputText.trim();
+    if (trimmedText && onSaveToNote) {
+      onSaveToNote(trimmedText);
+      onClose();
+    } else if (trimmedText) {
+      alert("Note saving is not implemented.");
+      onClose();
     }
-  };
+  }, [inputText, onSaveToNote, onClose]);
+
+  // Performance optimization: Memoized render
+  const renderContent = useMemo(() => ({
+    expandButton: (
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="px-4 py-1 bg-indigo-700 text-white rounded-full hover:bg-indigo-600"
+      >
+        {isExpanded ? "Collapse" : "Expand"}
+      </button>
+    )
+  }), [isExpanded]);
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
       <div 
-        className={`bg-gray-900 p-6 rounded-xl shadow-2xl flex flex-col transition-all duration-500 ease-in-out ${
+        className={`bg-gray-900 p-6 rounded-xl shadow-2xl flex flex-col transition-all duration-500 ease-in-out border-2 border-purple-500 ${
           isExpanded 
             ? "w-[95vw] h-[90vh] max-w-full" 
             : "w-full max-w-3xl h-auto max-h-[80vh]"
         }`}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-white bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+          <h2 className="text-3xl font-extrabold text-white bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 bg-clip-text text-transparent font-mono tracking-tight">
             {gameTitle}
           </h2>
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="px-4 py-1 bg-purple-700 text-white rounded-full hover:bg-purple-800 transition-all duration-300 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            {isExpanded ? "Collapse" : "Expand"}
-          </button>
+          {renderContent.expandButton}
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-grow">
           <textarea
             ref={textareaRef}
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder="Enter your notes here..."
-            className="w-full flex-grow p-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-300 resize-none overflow-y-auto placeholder-gray-500 min-h-[400px] font-mono"
+            onChange={(e) => debouncedSetInputText(e.target.value)}
+            placeholder="Drop your notes here... 📚✨"
+            className="w-full flex-grow p-4 bg-gray-800 text-white rounded-lg border-2 border-gray-700"
             disabled={isSubmitting}
-            style={{ lineHeight: '1.5' }}
+            maxLength={MAX_INPUT_LENGTH}
           />
+          
           <div className="flex justify-between gap-3 mt-4">
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={handleBeautify}
-                className="px-4 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-all duration-300 transform hover:scale-110 hover:rotate-2 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting || !inputText}
+                className="btn-primary"
               >
-                <span className="relative">
-                  Beautify
-                  <span className="absolute -top-1 -right-4 text-xs text-purple-200 animate-pulse">✨</span>
-                </span>
+                ✨ Beautify
               </button>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-700 text-white rounded-full hover:bg-gray-600 transition-all duration-300 transform hover:scale-110 hover:-rotate-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
+                className="btn-secondary"
               >
-                Cancel
+                Bail Out ✌️
               </button>
             </div>
+            
             <div className="flex gap-3">
-              {/* Save to Note button - always show unless explicitly hidden */}
               {!hideNoteButton && (
                 <button
                   type="button"
                   onClick={handleSaveToNote}
-                  className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-500 transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isSubmitting || !inputText}
+                  className="btn-success"
                 >
-                  Save to Note
+                  📓 Save Note
                 </button>
               )}
+              
               <button
                 type="submit"
-                className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:from-purple-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting || !inputText}
+                className="btn-submit"
               >
-                {isSubmitting ? "Processing..." : "Submit"}
+                {isSubmitting ? "Loading..." : "Let's Go! 🚀"}
               </button>
             </div>
           </div>
@@ -204,4 +217,46 @@ export default function GameModal({
       </div>
     </div>
   );
+}
+
+// Pure function for text transformation
+function transformText(text: string): string {
+  const paragraphs = text
+    .split(/\n\s*\n|\n/)
+    .map(p => p?.trim() || "")
+    .filter(p => p.length > 0);
+
+  const bulletColors = ["🔴", "🟠", "🟡", "🟢", "🔵", "🟣"];
+  let bulletColorIndex = 0;
+
+  return paragraphs
+    .map((para, index) => {
+      const headerMatch = para.match(/^(#+)\s/);
+      if (headerMatch) {
+        const headerLevel = headerMatch[1].length;
+        const headerText = para.replace(/^#+\s/, '');
+        return headerLevel === 1 
+          ? `# 📝 ${headerText.toUpperCase()} 📝`
+          : `${'#'.repeat(headerLevel)} ${headerText}`;
+      }
+
+      if (para.match(/^[-*]\d+\./)) {
+        return para
+          .split("\n")
+          .map(line => {
+            if (line.startsWith("-") || line.startsWith("*")) {
+              const bullet = bulletColors[bulletColorIndex];
+              bulletColorIndex = (bulletColorIndex + 1) % bulletColors.length;
+              return `  ${bullet} ${line.slice(1).trim()}`;
+            }
+            return `  ${line}`;
+          })
+          .join("\n");
+      }
+
+      return index === 0 && !para.match(/^#+\s/) 
+        ? `✍️ ${para}` 
+        : para;
+    })
+    .join("\n\n");
 }

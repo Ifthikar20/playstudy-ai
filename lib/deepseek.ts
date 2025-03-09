@@ -1,13 +1,8 @@
 import axios, { AxiosError } from "axios";
-
-interface DeepSeekResponse {
-  choices: { message: { content: string } }[];
-  usage: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
-}
+import OpenAI from "openai";
 
 export async function generateGameContent(gameTitle: string, inputText: string): Promise<string> {
   const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
-  const DEEPSEEK_API_URL = process.env.DEEPSEEK_API_URL || "https://api.deepseek.com/v1/chat/completions";
   const GROK_API_KEY = process.env.GROK_API_KEY;
   const GROK_API_URL = "https://api.x.ai/v1/chat/completions";
 
@@ -33,39 +28,37 @@ Input text:
 ${inputText}
 `;
 
-  // Try DeepSeek first
+  // Try DeepSeek first with OpenAI SDK approach
   if (DEEPSEEK_API_KEY) {
     try {
-      console.log("Attempting DeepSeek API Call...");
-      const response = await axios.post<DeepSeekResponse>(
-        DEEPSEEK_API_URL,
-        {
-          model: "deepseek-r3",
-          messages: [
-            { role: "system", content: "You are an AI that transforms educational content into interactive game formats." },
-            { role: "user", content: prompt },
-          ],
-          temperature: 0.7,
-          max_tokens: 1000,
-          top_p: 0.9,
-        },
-        {
-          headers: {
-            "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const deepSeekContent = response.data.choices[0].message.content;
-      console.log(`DeepSeek API Success: "${deepSeekContent}"`);
+      console.log("Attempting DeepSeek API Call with OpenAI SDK approach...");
+      
+      // Initialize the OpenAI client with DeepSeek base URL
+      const openai = new OpenAI({
+        baseURL: 'https://api.deepseek.com',
+        apiKey: DEEPSEEK_API_KEY,
+      });
+      
+      // Use the OpenAI SDK to make the request
+      const completion = await openai.chat.completions.create({
+        model: "deepseek-chat",
+        messages: [
+          { role: "system", content: "You are an AI that transforms educational content into interactive game formats." },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000,
+      });
+      
+      const deepSeekContent = completion.choices[0].message.content || "";
+      console.log(`DeepSeek API Success: "${deepSeekContent.substring(0, 50)}..."`);
       return deepSeekContent;
     } catch (deepSeekError) {
-      const isAxiosError = deepSeekError instanceof AxiosError;
       console.error("DeepSeek API Error:", {
         message: deepSeekError instanceof Error ? deepSeekError.message : "Unknown error",
-        status: isAxiosError ? deepSeekError.response?.status : undefined,
-        data: isAxiosError ? deepSeekError.response?.data : undefined,
+        details: deepSeekError
       });
+      console.log("DeepSeek call failed, falling back to Grok");
     }
   } else {
     console.log("No DEEPSEEK_API_KEY provided, falling back to Grok");
@@ -81,7 +74,7 @@ ${inputText}
     const response = await axios.post(
       GROK_API_URL,
       {
-        model: "grok-2-vision-1212", // Explicitly using grok-2-vision-1212
+        model: "grok-2-vision-1212",
         messages: [
           { role: "system", content: "You are an AI that transforms educational content into interactive game formats." },
           { role: "user", content: prompt },
@@ -95,10 +88,11 @@ ${inputText}
           "Authorization": `Bearer ${GROK_API_KEY}`,
           "Content-Type": "application/json",
         },
+        timeout: 30000
       }
     );
     const grokContent = response.data.choices[0].message.content;
-    console.log(`Grok API Success: "${grokContent}"`);
+    console.log(`Grok API Success: "${grokContent.substring(0, 50)}..."`);
     return grokContent;
   } catch (grokError) {
     const isAxiosError = grokError instanceof AxiosError;

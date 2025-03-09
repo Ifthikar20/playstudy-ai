@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 
@@ -35,40 +35,42 @@ interface WordPosition {
   correctAttempt?: number;
 }
 
+// Constants
+const MAX_ATTEMPTS = 3;
+const MAX_XP_PER_QUESTION = 20;
+const GRID_SIZE = 15;
+const FILLER_WORDS = ["of", "and", "the", "in", "to", "a", "an"] as const;
+type FillerWord = typeof FILLER_WORDS[number]; // "of" | "and" | "the" | "in" | "to" | "a" | "an"
+
 export default function CrossWordGame({ quizData, onClose }: CrossWordGameProps) {
   const [grid, setGrid] = useState<Cell[][]>([]);
   const [wordPositions, setWordPositions] = useState<WordPosition[]>([]);
   const [totalXP, setTotalXP] = useState(0);
   const [gameCompleted, setGameCompleted] = useState(false);
   const [attempts, setAttempts] = useState(0);
-  const MAX_ATTEMPTS = 3;
-  const MAX_XP_PER_QUESTION = 20;
-  const GRID_SIZE = 15;
 
-  const extractWordAndHint = (correctAnswer: string) => {
+  const extractWordAndHint = useCallback((correctAnswer: string) => {
     const fullAnswer = correctAnswer.replace(/^[A-D]\.\s*/, "").toLowerCase();
     const answerWords = fullAnswer.split(" ");
-    const fillerWords = ["of", "and", "the", "in", "to", "a", "an"];
-    const contentWords = answerWords.filter((word) => !fillerWords.includes(word));
-    
-    const wordToGuess = contentWords[contentWords.length - 1];
+    const contentWords = answerWords.filter((word): word is string => !FILLER_WORDS.includes(word as FillerWord));
+    const wordToGuess = contentWords[contentWords.length - 1] || "";
     const hint = fullAnswer.slice(0, fullAnswer.lastIndexOf(wordToGuess)).trim() + " ";
     return { word: wordToGuess, hint };
-  };
+  }, []);
 
-  const findSharedLetter = (word1: string, word2: string) => {
+  const findSharedLetter = useCallback((word1: string, word2: string) => {
     for (const char of word1) {
       if (word2.includes(char)) return char;
     }
     return null;
-  };
+  }, []);
 
-  const canPlaceWord = (
+  const canPlaceWord = useCallback((
     grid: Cell[][],
     word: string,
     x: number,
     y: number,
-    direction: "horizontal" | "vertical",
+    direction: "horizontal" | "vertical"
   ) => {
     for (let i = 0; i < word.length; i++) {
       const newX = direction === "horizontal" ? x + i : x;
@@ -84,9 +86,9 @@ export default function CrossWordGame({ quizData, onClose }: CrossWordGameProps)
       }
     }
     return true;
-  };
+  }, []);
 
-  const placeWord = (
+  const placeWord = useCallback((
     grid: Cell[][],
     word: string,
     x: number,
@@ -112,9 +114,9 @@ export default function CrossWordGame({ quizData, onClose }: CrossWordGameProps)
         ...(i === 0 && !cell.number && { number, isStart: true, direction }),
       };
     }
-  };
+  }, []);
 
-  const generateCrossword = () => {
+  const generateCrossword = useCallback(() => {
     const newGrid: Cell[][] = Array(GRID_SIZE)
       .fill(null)
       .map(() => Array(GRID_SIZE).fill({ letter: "", userLetter: "", wordIndices: [] }));
@@ -143,13 +145,11 @@ export default function CrossWordGame({ quizData, onClose }: CrossWordGameProps)
           const wordLength = word.length;
           const endX = direction === "horizontal" ? startX + wordLength - 1 : startX;
           const endY = direction === "vertical" ? startY + wordLength - 1 : startY;
+
           if (
-            startX < 0 ||
-            startX >= GRID_SIZE ||
-            startY < 0 ||
-            startY >= GRID_SIZE ||
-            endX >= GRID_SIZE ||
-            endY >= GRID_SIZE
+            startX < 0 || startX >= GRID_SIZE || 
+            startY < 0 || startY >= GRID_SIZE || 
+            endX >= GRID_SIZE || endY >= GRID_SIZE
           ) {
             attempts++;
             continue;
@@ -189,32 +189,32 @@ export default function CrossWordGame({ quizData, onClose }: CrossWordGameProps)
 
     setGrid(newGrid);
     setWordPositions(positions);
-    console.log("Generated Grid:", newGrid);
-    console.log("Word Positions:", positions);
-  };
+  }, [quizData, extractWordAndHint, findSharedLetter, canPlaceWord, placeWord]);
 
   useEffect(() => {
     generateCrossword();
-  }, [quizData, generateCrossword]);
+  }, [generateCrossword]);
 
-  const handleCellChange = (x: number, y: number, value: string) => {
-    const newGrid = [...grid];
-    if (newGrid[y][x].wordIndices.length > 0) {
-      newGrid[y][x].userLetter = value.toLowerCase().slice(-1);
-      setGrid(newGrid);
-    }
-  };
+  const handleCellChange = useCallback((x: number, y: number, value: string) => {
+    setGrid((prevGrid) => {
+      const newGrid = prevGrid.map(row => [...row]);
+      if (newGrid[y][x].wordIndices.length > 0) {
+        newGrid[y][x].userLetter = value.toLowerCase().slice(-1);
+      }
+      return newGrid;
+    });
+  }, []);
 
-  const calculateXP = (attempt: number) => {
+  const calculateXP = useCallback((attempt: number) => {
     switch (attempt) {
-      case 1: return MAX_XP_PER_QUESTION; // 20 XP
-      case 2: return Math.floor(MAX_XP_PER_QUESTION * 0.75); // 15 XP
-      case 3: return Math.floor(MAX_XP_PER_QUESTION * 0.5); // 10 XP
+      case 1: return MAX_XP_PER_QUESTION;
+      case 2: return Math.floor(MAX_XP_PER_QUESTION * 0.75);
+      case 3: return Math.floor(MAX_XP_PER_QUESTION * 0.5);
       default: return 0;
     }
-  };
+  }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (attempts >= MAX_ATTEMPTS) return;
 
     const newAttempts = attempts + 1;
@@ -223,7 +223,8 @@ export default function CrossWordGame({ quizData, onClose }: CrossWordGameProps)
     let newXP = totalXP;
     let allCorrect = true;
 
-    wordPositions.forEach((pos) => {
+    const updatedPositions = wordPositions.map(pos => ({ ...pos }));
+    updatedPositions.forEach((pos) => {
       let isCorrect = true;
       for (let i = 0; i < pos.word.length; i++) {
         const x = pos.direction === "horizontal" ? pos.startX + i : pos.startX;
@@ -244,24 +245,20 @@ export default function CrossWordGame({ quizData, onClose }: CrossWordGameProps)
     });
 
     setTotalXP(newXP);
+    setWordPositions(updatedPositions);
+    setGameCompleted(allCorrect || newAttempts === MAX_ATTEMPTS);
+  }, [attempts, totalXP, wordPositions, grid, calculateXP]);
 
-    // End game if all correct (on any attempt) or max attempts reached
-    if (allCorrect || newAttempts === MAX_ATTEMPTS) {
-      setGameCompleted(true);
-    }
-  };
-
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setTotalXP(0);
     setGameCompleted(false);
     setAttempts(0);
     generateCrossword();
-  };
+  }, [generateCrossword]);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-gray-800 p-6 rounded-xl shadow-lg w-full max-w-5xl border border-purple-500/30 relative flex">
-        {/* Questions on Left */}
         <div className="w-1/3 pr-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-bold text-purple-400">Crossword Quiz</h2>
@@ -302,7 +299,7 @@ export default function CrossWordGame({ quizData, onClose }: CrossWordGameProps)
                   width={200}
                   height={200}
                   className="mx-auto mb-4 animate-bounce"
-                  unoptimized
+                  loading="lazy"
                 />
                 <h3 className="text-xl font-bold text-purple-400 mb-2">
                   {attempts === 1 && totalXP === quizData.length * MAX_XP_PER_QUESTION
@@ -315,13 +312,13 @@ export default function CrossWordGame({ quizData, onClose }: CrossWordGameProps)
                 <div className="flex gap-4 justify-center">
                   <button
                     onClick={resetGame}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 transition-colors text-white rounded-lg"
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
                   >
                     Play Again
                   </button>
                   <button
                     onClick={onClose}
-                    className="px-4 py-2 bg-gray-700 rounded-lg text-gray-300 hover:bg-gray-600 transition-colors"
+                    className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
                   >
                     Close
                   </button>
@@ -331,7 +328,6 @@ export default function CrossWordGame({ quizData, onClose }: CrossWordGameProps)
           )}
         </div>
 
-        {/* Crossword Grid */}
         <div className="flex-1">
           <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 2rem)` }}>
             {grid.map((row, y) =>
@@ -339,9 +335,7 @@ export default function CrossWordGame({ quizData, onClose }: CrossWordGameProps)
                 <div
                   key={`${x}-${y}`}
                   className={`w-8 h-8 flex items-center justify-center text-white text-sm border relative ${
-                    cell.wordIndices.length > 0
-                      ? "bg-gray-700 border-gray-600"
-                      : "bg-gray-900 border-gray-800"
+                    cell.wordIndices.length > 0 ? "bg-gray-700 border-gray-600" : "bg-gray-900 border-gray-800"
                   }`}
                 >
                   {cell.isStart && cell.number && (

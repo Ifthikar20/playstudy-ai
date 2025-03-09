@@ -2,14 +2,35 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from 'next/dynamic';
 import Image from "next/image";
 import { Brain, Gamepad, Book } from "lucide-react";
 import GameModal from "@/app/dashboard/_components/GameModal";
-import Hangman from "@/app/dashboard/_components/Games/HangmanGame";
-import MillionaireGame from "@/app/dashboard/_components/Games/MillionaireGame";
-import QuickQuizGame from "@/app/dashboard/_components/Games/QuickQuizGame";
-import MemoryMatchGame from "@/app/dashboard/_components/Games/MemoryMatchGame";
-import CrossWordGame from "@/app/dashboard/_components/Games/CrossWordGame"; 
+
+const Hangman = dynamic(
+  () => import("@/app/dashboard/_components/Games/HangmanGame"),
+  { loading: () => <p>Loading game...</p>, ssr: false }
+);
+
+const MillionaireGame = dynamic(
+  () => import("@/app/dashboard/_components/Games/MillionaireGame"),
+  { loading: () => <p>Loading game...</p>, ssr: false }
+);
+
+const QuickQuizGame = dynamic(
+  () => import("@/app/dashboard/_components/Games/QuickQuizGame"),
+  { loading: () => <p>Loading game...</p>, ssr: false }
+);
+
+const MemoryMatchGame = dynamic(
+  () => import("@/app/dashboard/_components/Games/MemoryMatchGame"),
+  { loading: () => <p>Loading game...</p>, ssr: false }
+);
+
+const CrossWordGame = dynamic(
+  () => import("@/app/dashboard/_components/Games/CrossWordGame"),
+  { loading: () => <p>Loading game...</p>, ssr: false }
+);
 
 interface User {
   name: string | null;
@@ -99,7 +120,7 @@ function GameCard({
           width={300}
           height={128}
           className="w-full h-full object-cover"
-          unoptimized
+          loading="lazy" 
         />
         {title === "Millionaire" && (
           <div className="absolute top-2 left-2 bg-black/80 px-2 py-1 rounded-full text-xs text-white flex items-center gap-1">

@@ -23,18 +23,19 @@ export default function SideNav() {
       </div>
       <nav className="space-y-2">
         {menuItems.map((item) => (
-          <Link
-            key={item.path}
-            href={item.path}
-            className={`flex items-center gap-2 p-3 rounded-lg transition-all ${
-              pathname === item.path
-                ? "nav-active"
-                : "text-gray-400 hover:bg-gray-700 hover:text-white"
-            }`}
-          >
-            <item.icon className="h-5 w-5" />
-            <span className="text-sm sm:text-base">{item.name}</span>
-          </Link>
+         <Link
+         key={item.path}
+         href={item.path}
+         prefetch={false} // Disable prefetching
+         className={`flex items-center gap-2 p-3 rounded-lg transition-all ${
+           pathname === item.path
+             ? "nav-active"
+             : "text-gray-400 hover:bg-gray-700 hover:text-white"
+         }`}
+       >
+         <item.icon className="h-5 w-5" />
+         <span className="text-sm sm:text-base">{item.name}</span>
+       </Link>
         ))}
       </nav>
     </div>
