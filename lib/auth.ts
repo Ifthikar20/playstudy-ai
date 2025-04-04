@@ -5,6 +5,10 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.NEXTAUTH_SECRET || 'your-secret-key'
 );
 
+const BACKEND_JWT_SECRET = new TextEncoder().encode(
+  process.env.BACKEND_JWT_SECRET || process.env.NEXTAUTH_SECRET || 'your-backend-secret-key'
+);
+
 export interface UserSession {
   id: string;
   email: string;
@@ -84,4 +88,21 @@ function isValidSession(payload: JWTPayload): payload is JWTPayload & Required<P
     (payload.name === null || typeof payload.name === 'string') &&
     (payload.image === null || typeof payload.image === 'string')
   );
+}
+
+export async function createBackendToken(user: UserSession): Promise<string> {
+  console.log('Creating backend token for user:', user.email);
+  const token = await new SignJWT({
+    user_id: user.id,
+    email: user.email,
+    name: user.name || '',
+    image: user.image || '',
+  })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('15m') // 15 minute expiration
+    .sign(BACKEND_JWT_SECRET);
+  
+  console.log('Backend token created successfully');
+  return token;
 }
