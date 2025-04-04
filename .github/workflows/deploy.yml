@@ -61,6 +61,7 @@ jobs:
                 -e GOOGLE_GEMINI_API_KEY="${{ secrets.GOOGLE_GEMINI_API_KEY }}" \
                 -e GROK_API_KEY="${{ secrets.GROK_API_KEY }}" \
                 -e REDIS_URL="${{ secrets.REDIS_URL }}" \
+                -e BACKEND_JWT_SECRET="${{ secrets.BACKEND_JWT_SECRET }}" \
                 -p 3000:3000 \
                 playstudy-ai
               echo "Cleaning up old images..."

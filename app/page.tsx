@@ -25,28 +25,46 @@ export default function Page() {
   // Sample student feedback data
   const studentFeedback = [
     {
-      name: "Alex Chen",
-      university: "Nova University",
-      quote: "PlayStudy turned my boring history notes into an epic adventure. I aced my exam!",
-      avatar: "https://i.pravatar.cc/150?img=1"
+      name: "Sheryl Berge",
+      university: "MIT",
+      major: "Physics",
+      quote: "I can focus on understanding concepts, not just jotting down notes. It's like having a personal study assistant.",
+      interestedFeature: "Concept Maps"
     },
     {
-      name: "Sarah Martinez",
-      university: "Lunar State College",
-      quote: "The games made learning chemistry actually fun. My grades have never been better!",
-      avatar: "https://i.pravatar.cc/150?img=2"
+      name: "Yash Sharma",
+      university: "Duke University",
+      major: "Public Policy",
+      quote: "The flashcards created are tailored to my learning style. It's like the AI knows exactly what I need to study.",
+      interestedFeature: "Smart Flashcards"
     },
     {
-      name: "Jamal Okoro",
-      university: "Stellar Tech Institute",
-      quote: "I couldn't believe how much I remembered after playing the memory match game!",
-      avatar: "https://i.pravatar.cc/150?img=3"
+      name: "Kiehn Po",
+      university: "Princeton University",
+      major: "Computer Science",
+      quote: "Love how it generates quizzes from my lectures. Makes revising so much more efficient and less stressful.",
+      interestedFeature: "Quiz Generator"
     },
     {
-      name: "Emily Park",
-      university: "Aurora Academy",
-      quote: "The quick quizzes are addictive - I didn't even realize I was studying!",
-      avatar: "https://i.pravatar.cc/150?img=4"
+      name: "Presley Burghardt",
+      university: "Stanford University",
+      major: "Premed",
+      quote: "It turns my YouTube binges into productive study sessions. It's a game-changer.",
+      interestedFeature: "Video Summarizer"
+    },
+    {
+      name: "Peter Reynolds",
+      university: "Columbia University",
+      major: "Political Science",
+      quote: "I love how it can take an article and break it into bite-sized materials. Reading academic articles feels less daunting now.",
+      interestedFeature: "Article Breakdown"
+    },
+    {
+      name: "Rithik Duvva",
+      university: "Duke University",
+      major: "Economics",
+      quote: "I feel like I'm studying smarter, not harder. It's a boon for anyone who values efficiency.",
+      interestedFeature: "Study Optimization"
     }
   ];
 
@@ -181,6 +199,17 @@ export default function Page() {
         </div>
       )}
 
+<nav className="border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link href="/" className="flex items-center">
+              <Gamepad className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500" />
+              <span className="ml-2 text-lg sm:text-xl font-bold">PlayStudy.AI</span>
+            </Link>
+          </div>
+        </div>
+      </nav>
+{/* 
       <nav className="header fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -228,12 +257,12 @@ export default function Page() {
             </div>
           </div>
         )}
-      </nav>
+      </nav> */}
 
       <div className="relative pt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
           <div className="text-center relative">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-purple-500 animate-text-glow">
+          <h1 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text text-transparent">
               Why Study When You Can PlayStudy?
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-gray-300 mb-6 sm:mb-8 max-w-xl sm:max-w-2xl mx-auto px-4 animate-fade-in-up delay-200">
@@ -259,7 +288,7 @@ export default function Page() {
                 width={1280}
                 height={720}
                 className="w-full h-full object-cover"
-                loading="lazy" 
+                loading="lazy"
               />
             </div>
           </div>
@@ -367,7 +396,7 @@ export default function Page() {
                   width={300}
                   height={128}
                   className="w-full h-32 object-cover rounded-t-lg mb-3 border border-purple-500/50"
-                  loading="lazy" 
+                  loading="lazy"
                 />
                 <h3 className="text-lg font-bold text-[var(--foreground)] mb-2 text-purple-300">Quick Quiz</h3>
                 <p className="text-purple-100 text-xs mb-1">
@@ -430,7 +459,7 @@ export default function Page() {
                     width={300}
                     height={128}
                     className="w-full h-32 object-cover rounded-t-lg mb-3 border border-purple-500/50"
-                    loading="lazy" 
+                    loading="lazy"
                   />
                   <h3 className="text-lg font-bold text-[var(--foreground)] mb-2 text-purple-300">{gameTitle}</h3>
                   <p className={`${game.textColor} text-xs mb-1`}>
@@ -467,7 +496,7 @@ export default function Page() {
                     width={300}
                     height={128}
                     className="w-full h-32 object-cover rounded-t-lg mb-3 border border-purple-500/50"
-                    loading="lazy" 
+                    loading="lazy"
                   />
                   <h3 className="text-lg font-bold text-[var(--foreground)] mb-2 text-purple-300">{gameTitle}</h3>
                   <p className={`${game.textColor} text-xs mb-1`}>
@@ -497,83 +526,101 @@ export default function Page() {
           <br />
           <br /><br />
 
+
           {/* Wall of Players Section */}
           <div className="mt-16 mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 text-purple-500 animate-text-glow">
-              Wall of Players
+            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 text-purple-400">
+              Trusted by Top University Students
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            {/* Testimonial grid with interested features */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
               {studentFeedback.map((student, index) => (
                 <div
                   key={index}
-                  className="card-hover bg-gray-800/50 p-6 rounded-xl border border-purple-500/20 transform hover:scale-105 transition-all duration-300"
+                  className="bg-gray-800 p-6 rounded-xl border border-purple-500/20 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 hover:translate-y-[-4px]"
                 >
-                  <div className="flex items-center mb-4">
-                    <Image
-                      src={student.avatar}
-                      alt={`${student.name}'s avatar`}
-                      width={48}
-                      height={48}
-                      className="rounded-full mr-3"
-                      loading="lazy" 
-                    />
-                    <div>
-                      <p className="font-semibold text-purple-400">{student.name}</p>
-                      <p className="text-sm text-gray-400">{student.university}</p>
-                    </div>
+                  {/* Feature badge */}
+                  <div className="mb-4">
+                    <span className="bg-purple-500/20 text-purple-300 text-xs px-3 py-1 rounded-full font-medium">
+                      {student.interestedFeature}
+                    </span>
                   </div>
 
-                  <p className="text-gray-300 text-sm italic">{student.quote}</p>
+                  <blockquote className="text-gray-300 text-sm leading-relaxed mb-5 border-l-2 border-purple-500/30 pl-4 italic">
+                    "{student.quote}"
+                  </blockquote>
+
+                  <div className="mt-4 pt-3 border-t border-gray-700">
+                    <p className="font-semibold text-white">{student.name}</p>
+                    <p className="text-sm text-purple-300">{student.major} Major</p>
+                    <p className="text-xs text-gray-400">{student.university}</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-          
+
+
           {/* Footer */}
           <footer className="bg-black text-white py-12">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {/* Our Mission */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4 text-purple-500">
-          Our Mission
-        </h3>
-        <p className="text-sm">
-          At PlayStudy.AI, {"we're"} on a quest to revolutionize learning by turning mundane study sessions into electrifying game experiences. We believe education should spark joy, ignite curiosity, and stick with you—because why just study when you can play?
-        </p>
-      </div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Our Mission */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-purple-500">
+                    Our Mission
+                  </h3>
+                  <p className="text-sm">
+                    At PlayStudy.AI, {"we're"} on a quest to revolutionize learning by turning mundane study sessions into electrifying game experiences. We believe education should spark joy, ignite curiosity, and stick with you—because why just study when you can play?
+                  </p>
+                </div>
 
-      {/* Policy and Conduct */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4 text-purple-500">
-          Policy and Conduct
-        </h3>
-        <p className="text-sm">
-          {"We're"} committed to creating a fun, fair, and respectful community. Our policies ensure a safe space for all players—{"cheating's"} out, {"creativity's"} in. Check out our full guidelines for the rules of the game.
-        </p>
-        <Link href="/policy" className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block transition-colors">
-          Read More
-        </Link>
-      </div>
+                {/* Policy and Conduct */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-purple-500">
+                    Policy and Conduct
+                  </h3>
+                  <p className="text-sm">
+                    {"We're"} committed to creating a fun, fair, and respectful community. Our policies ensure a safe space for all players—{"cheating's"} out, {"creativity's"} in. Check out our full guidelines for the rules of the game.
+                  </p>
+                  <Link href="/policy" className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block transition-colors">
+                    Read More
+                  </Link>
+                </div>
 
-      {/* Learn About Refund */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4 text-purple-500">
-          Learn About Refund
-        </h3>
-        <p className="text-sm">
-          Changed your mind? {"We've"} got you covered with a straightforward refund process. Dive into the details to see how we keep things hassle-free and player-friendly.
-        </p>
-        <Link href="/refunds" className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block transition-colors">
-          Learn More
-        </Link>
-      </div>
-    </div>
-    <div className="mt-8 text-center text-sm text-gray-400">
-      © 2025 PlayStudy.AI. All rights reserved. test
-    </div>
-  </div>
-</footer>
+                {/* Learn About Refund */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-purple-500">
+                    Learn About Refund
+                  </h3>
+                  <p className="text-sm">
+                    Changed your mind? {"We've"} got you covered with a straightforward refund process. Dive into the details to see how we keep things hassle-free and player-friendly.
+                  </p>
+                  <Link href="/refunds" className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block transition-colors">
+                    Learn More
+                  </Link>
+                </div>
+              </div>
+              <div className="mt-8 text-center text-sm text-gray-400">
+                © 2025 PlayStudy.AI. All rights reserved.
+                <div className="flex flex-wrap justify-center gap-4 mt-4">
+                  <Link href="/policy" className="text-purple-400 hover:text-purple-300 text-sm transition-colors">
+                    Policy and Conduct
+                  </Link>
+                  <Link href="/terms" className="text-purple-400 hover:text-purple-300 text-sm transition-colors">
+                    Terms of Service
+                  </Link>
+                  <Link href="/contact" className="text-purple-400 hover:text-purple-300 text-sm transition-colors">
+                    Contact Us
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </footer>
+
+
+
         </div>
 
         <div className="absolute top-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full filter blur-3xl animate-pulse-slow"></div>

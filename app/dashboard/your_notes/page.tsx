@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Plus, Search, FileText, Trash2, Edit3, Play, Star, Filter, Grid, List } from "lucide-react";
+import { Plus, Search, FileText, Trash2, Edit3, Play, Star, Filter, Grid, List, X, Save } from "lucide-react";
 import Link from "next/link";
 import GameModal from "@/app/dashboard/_components/GameModal";
 import Hangman from "@/app/dashboard/_components/Games/HangmanGame";
@@ -70,6 +70,86 @@ interface QuizQuestion {
 type ViewMode = "grid" | "list";
 type SortOption = "edited" | "played" | "title";
 
+// Interface for FullScreenEditor props
+interface FullScreenEditorProps {
+  content: string;
+  onSave: (content: string) => void;
+  onClose: () => void;
+  isNew?: boolean;
+}
+
+// New component for full-screen editor
+const FullScreenEditor: React.FC<FullScreenEditorProps> = ({ 
+  content, 
+  onSave, 
+  onClose,
+  isNew = false
+}) => {
+  const [editorContent, setEditorContent] = useState(content);
+  
+  // Handle keyboard shortcuts (Ctrl+S to save, Esc to close)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Save on Ctrl+S
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        onSave(editorContent);
+      }
+      // Close on Escape
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [editorContent, onSave, onClose]);
+  
+  return (
+    <div className="fixed inset-0 bg-gray-900 z-50 flex flex-col">
+      {/* Header */}
+      <div className="bg-gray-800 p-4 flex justify-between items-center border-b border-gray-700">
+        <h2 className="text-xl font-bold text-white">
+          {isNew ? "Create New Note" : "Edit Note"}
+        </h2>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => onSave(editorContent)}
+            className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+          >
+            <Save className="h-4 w-4" />
+            <span>Save</span>
+          </button>
+          <button
+            onClick={onClose}
+            className="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-lg"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+      
+      {/* Editor */}
+      <div className="flex-grow overflow-auto p-4">
+        <textarea
+          className="w-full h-full bg-gray-800 text-white p-4 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+          value={editorContent}
+          onChange={(e) => setEditorContent(e.target.value)}
+          placeholder="Start typing your note here..."
+          autoFocus
+        />
+      </div>
+      
+      {/* Footer with keyboard shortcuts */}
+      <div className="bg-gray-800 p-2 text-gray-400 text-xs border-t border-gray-700 flex justify-center">
+        <span className="mx-2">Press <kbd className="bg-gray-700 px-2 py-1 rounded">Ctrl + S</kbd> to save</span>
+        <span className="mx-2">Press <kbd className="bg-gray-700 px-2 py-1 rounded">Esc</kbd> to close</span>
+      </div>
+    </div>
+  );
+};
+
 export default function YourNotes() {
   // Get memoized sample notes
   const sampleNotesData = useSampleNotes();
@@ -84,6 +164,11 @@ export default function YourNotes() {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const [modalInitialContent, setModalInitialContent] = useState("");
   const [hangmanQuiz, setHangmanQuiz] = useState<QuizQuestion[] | null>(null);
+  
+  // New state for full-screen editor
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [editorContent, setEditorContent] = useState("");
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
 
   // Get all unique tags from notes - memoized to avoid recalculation on every render
   const allTags = useMemo(() => {
@@ -155,15 +240,75 @@ export default function YourNotes() {
     }
   }, [notes]);
 
-  // Open the "Create New Note" modal
+  // Open the full-screen editor for a new note
   const handleCreateNewNote = useCallback(() => {
-    setSelectedNote(null);
-    setSelectedGame("Create New Note");
-    setModalInitialContent("");
-    setIsModalOpen(true);
+    setEditingNoteId(null);
+    setEditorContent("");
+    setIsEditorOpen(true);
   }, []);
 
-  // Save content from modal to a new or existing note
+  // Open the full-screen editor for an existing note
+  const handleEditNote = useCallback((id: string) => {
+    const noteToEdit = notes.find(note => note.id === id);
+    if (noteToEdit) {
+      setEditingNoteId(id);
+      setEditorContent(noteToEdit.content);
+      setIsEditorOpen(true);
+    }
+  }, [notes]);
+
+  // Save content from full-screen editor to a new or existing note
+  const handleSaveNote = useCallback((content: string) => {
+    if (!content.trim()) return;
+
+    // Extract title from first line or use default
+    const lines = content.split('\n');
+    let title = "Untitled Note";
+
+    if (lines.length > 0) {
+      const firstLine = lines[0].trim();
+      // Check if it's a markdown header
+      if (firstLine.startsWith('#')) {
+        title = firstLine.replace(/^#+\s+/, '').trim();
+      } else if (firstLine.length > 0 && firstLine.length < 60) {
+        // Or just use the first line if it's reasonably short
+        title = firstLine;
+      }
+    }
+
+    if (editingNoteId) {
+      // Update existing note
+      setNotes(prevNotes =>
+        prevNotes.map(note =>
+          note.id === editingNoteId
+            ? {
+              ...note,
+              content: content,
+              title: title,
+              lastEdited: new Date().toISOString()
+            }
+            : note
+        )
+      );
+    } else {
+      // Create new note
+      const newNote = {
+        id: `note${Date.now()}`,
+        title: title,
+        content: content,
+        tags: [],
+        lastEdited: new Date().toISOString(),
+        playCount: 0,
+        starred: false,
+      };
+
+      setNotes(prevNotes => [...prevNotes, newNote]);
+    }
+
+    setIsEditorOpen(false);
+  }, [editingNoteId]);
+
+  // Save content from modal to a game note
   const handleSaveToNote = useCallback((content: string) => {
     if (!content.trim()) return;
 
@@ -389,14 +534,13 @@ export default function YourNotes() {
                 >
                   <Play className="h-4 w-4 text-white" />
                 </button>
-                <Link href={`/dashboard/your_notes/${note.id}`}>
-                  <button
-                    className="p-2 bg-blue-600 rounded-full hover:bg-blue-500"
-                    title="Edit"
-                  >
-                    <Edit3 className="h-4 w-4 text-white" />
-                  </button>
-                </Link>
+                <button
+                  onClick={() => handleEditNote(note.id)}
+                  className="p-2 bg-blue-600 rounded-full hover:bg-blue-500"
+                  title="Edit"
+                >
+                  <Edit3 className="h-4 w-4 text-white" />
+                </button>
                 <button
                   onClick={() => deleteNote(note.id)}
                   className="p-2 bg-red-600 rounded-full hover:bg-red-500"
@@ -445,14 +589,13 @@ export default function YourNotes() {
                   <span className="text-xs text-white">Play</span>
                 </button>
                 <div className="flex gap-2">
-                  <Link href={`/dashboard/your_notes/${note.id}`}>
-                    <button
-                      className="p-2 bg-blue-600 rounded-lg hover:bg-blue-500"
-                      title="Edit"
-                    >
-                      <Edit3 className="h-4 w-4 text-white" />
-                    </button>
-                  </Link>
+                  <button
+                    onClick={() => handleEditNote(note.id)}
+                    className="p-2 bg-blue-600 rounded-lg hover:bg-blue-500"
+                    title="Edit"
+                  >
+                    <Edit3 className="h-4 w-4 text-white" />
+                  </button>
                   <button
                     onClick={() => toggleStarNote(note.id)}
                     className="p-2 bg-gray-700 rounded-lg hover:bg-gray-600"
@@ -476,13 +619,24 @@ export default function YourNotes() {
           ))}
         </div>
       )}
-      {/* Game Modal - Used for both notes and games */}
+
+      {/* Game Modal - Used for games only now */}
       {isModalOpen && selectedGame && (
         <GameModal
           gameTitle={selectedGame}
           onClose={() => setIsModalOpen(false)}
           onSaveToNote={handleSaveToNote}
           initialContent={modalInitialContent}
+        />
+      )}
+
+      {/* Full-Screen Editor */}
+      {isEditorOpen && (
+        <FullScreenEditor
+          content={editorContent}
+          onSave={handleSaveNote}
+          onClose={() => setIsEditorOpen(false)}
+          isNew={editingNoteId === null}
         />
       )}
 

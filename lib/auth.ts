@@ -57,7 +57,7 @@ export async function getUserSession(): Promise<UserSession | null> {
 }
 
 export async function createSession(user: UserSession) {
-  const expiresInSeconds = 60; // 60 seconds
+  const expiresInSeconds = 600; // 60 seconds
   const token = await new SignJWT({
     id: user.id,
     email: user.email,
