@@ -1,18 +1,17 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Gamepad, Book, Brain, ArrowRight, Menu, X, Sparkles, Zap } from 'lucide-react';
-import Link from 'next/link';
-import GameModal from '@/app/dashboard/_components/GameModal';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import { Gamepad, Book, Brain, ArrowRight, Sparkles, Zap } from "lucide-react";
+import Link from "next/link";
+import GameModal from "@/app/dashboard/_components/GameModal";
+import Image from "next/image";
 
-type HoveredCard = 'active' | 'game' | 'note' | null;
+type HoveredCard = "active" | "game" | "note" | null;
 
 export default function Page() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<HoveredCard>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeSection, setActiveSection] = useState<"active" | "game" | "note" | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,14 +27,14 @@ export default function Page() {
       name: "Sheryl Berge",
       university: "MIT",
       major: "Physics",
-      quote: "I can focus on understanding concepts, not just jotting down notes. It's like having a personal study assistant.",
+      quote: "I can focus on understanding concepts, not just jotting down notes. It is like having a personal study assistant.",
       interestedFeature: "Concept Maps"
     },
     {
       name: "Yash Sharma",
       university: "Duke University",
       major: "Public Policy",
-      quote: "The flashcards created are tailored to my learning style. It's like the AI knows exactly what I need to study.",
+      quote: "The flashcards created are tailored to my learning style. It is like the AI knows exactly what I need to study.",
       interestedFeature: "Smart Flashcards"
     },
     {
@@ -49,7 +48,7 @@ export default function Page() {
       name: "Presley Burghardt",
       university: "Stanford University",
       major: "Premed",
-      quote: "It turns my YouTube binges into productive study sessions. It's a game-changer.",
+      quote: "It turns my YouTube binges into productive study sessions. It is a game-changer.",
       interestedFeature: "Video Summarizer"
     },
     {
@@ -63,7 +62,7 @@ export default function Page() {
       name: "Rithik Duvva",
       university: "Duke University",
       major: "Economics",
-      quote: "I feel like I'm studying smarter, not harder. It's a boon for anyone who values efficiency.",
+      quote: "I feel like I am studying smarter, not harder. It is a boon for anyone who values efficiency.",
       interestedFeature: "Study Optimization"
     }
   ];
@@ -75,11 +74,11 @@ export default function Page() {
     const handleScroll = () => {
       setScrollY(window.scrollY);
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
@@ -89,7 +88,7 @@ export default function Page() {
       setIsAuthenticated(true);
     } else {
       alert("Incorrect password. Please try again.");
-      setPassword('');
+      setPassword("");
     }
   };
 
@@ -209,55 +208,6 @@ export default function Page() {
           </div>
         </div>
       </nav>
-{/* 
-      <nav className="header fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Gamepad className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500 animate-pulse" />
-              <span className="ml-2 text-lg sm:text-xl font-bold text-purple-500">
-                PlayStudy.AI
-              </span>
-            </div>
-            <div className="hidden md:flex items-center space-x-4">
-              <Link href="/signin" className="header-link px-4 py-2 rounded-lg transition-all">
-                Sign In
-              </Link>
-              <Link href="/signin">
-                <button className="btn-primary hover:shadow-purple-600/50 transition-all transform hover:scale-105">
-                  Try Free
-                </button>
-              </Link>
-            </div>
-            <button
-              className="md:hidden p-2"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X className="h-6 w-6 text-gray-300" /> : <Menu className="h-6 w-6 text-gray-300" />}
-            </button>
-          </div>
-        </div>
-        {isMobileMenuOpen && (
-          <div className="md:hidden absolute top-16 inset-x-0 bg-gray-800/95 border-b border-gray-700 z-50 animate-slide-down">
-            <div className="px-4 py-4 space-y-3">
-              <Link
-                href="/signin"
-                className="header-link block w-full px-4 py-2 rounded-lg transition-all"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/signin"
-                className="btn-primary block w-full transition-all"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Try Free
-              </Link>
-            </div>
-          </div>
-        )}
-      </nav> */}
 
       <div className="relative pt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
@@ -297,7 +247,7 @@ export default function Page() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             <div
               className="card-hover relative p-4 sm:p-6 transition-all duration-300 transform hover:scale-105 hover:shadow-purple-600/30 overflow-hidden group cursor-pointer animate-slide-up delay-100"
-              onMouseEnter={() => setHoveredCard('active')}
+              onMouseEnter={() => setHoveredCard("active")}
               onMouseLeave={() => setHoveredCard(null)}
               onClick={() => handleSectionClick("active")}
             >
@@ -310,7 +260,7 @@ export default function Page() {
                   Engage with electrified games and quizzes.
                 </p>
               </div>
-              {hoveredCard === 'active' && (
+              {hoveredCard === "active" && (
                 <div className="absolute inset-0 z-0">
                   {[...Array(5)].map((_, i) => (
                     <Sparkles
@@ -329,7 +279,7 @@ export default function Page() {
 
             <div
               className="card-hover relative p-4 sm:p-6 transition-all duration-300 transform hover:scale-105 hover:shadow-purple-600/30 overflow-hidden group cursor-pointer animate-slide-up delay-200"
-              onMouseEnter={() => setHoveredCard('game')}
+              onMouseEnter={() => setHoveredCard("game")}
               onMouseLeave={() => setHoveredCard(null)}
               onClick={() => handleSectionClick("game")}
             >
@@ -342,7 +292,7 @@ export default function Page() {
                   Transform subjects into thrilling games.
                 </p>
               </div>
-              {hoveredCard === 'game' && (
+              {hoveredCard === "game" && (
                 <div className="absolute inset-0 z-0">
                   <div className="absolute w-20 h-20 bg-purple-500/30 rounded-full -top-10 -left-10 animate-ping" />
                   <div className="absolute w-16 h-16 bg-purple-600/30 rounded-full -bottom-8 -right-8 animate-ping delay-150" />
@@ -352,7 +302,7 @@ export default function Page() {
 
             <div
               className="card-hover relative p-4 sm:p-6 transition-all duration-300 transform hover:scale-105 hover:shadow-purple-600/30 overflow-hidden group sm:col-span-2 lg:col-span-1 cursor-pointer animate-slide-up delay-300"
-              onMouseEnter={() => setHoveredCard('note')}
+              onMouseEnter={() => setHoveredCard("note")}
               onMouseLeave={() => setHoveredCard(null)}
               onClick={() => handleSectionClick("note")}
             >
@@ -365,7 +315,7 @@ export default function Page() {
                   Notes into interactive chaos.
                 </p>
               </div>
-              {hoveredCard === 'note' && (
+              {hoveredCard === "note" && (
                 <div className="absolute inset-0 z-0">
                   {[...Array(4)].map((_, i) => (
                     <Zap
@@ -445,7 +395,7 @@ export default function Page() {
                   description: "Match or lose it.",
                   facts: "Memory overload.",
                   difficulties: ["Easy", "Chaos"],
-                  knownFor: "Flippin' fun",
+                  knownFor: "Flippin fun",
                 },
               }).map(([gameTitle, game]) => (
                 <div
@@ -548,7 +498,7 @@ export default function Page() {
                   </div>
 
                   <blockquote className="text-gray-300 text-sm leading-relaxed mb-5 border-l-2 border-purple-500/30 pl-4 italic">
-                    "{student.quote}"
+                    &ldquo;{student.quote}&rdquo;
                   </blockquote>
 
                   <div className="mt-4 pt-3 border-t border-gray-700">
@@ -572,7 +522,7 @@ export default function Page() {
                     Our Mission
                   </h3>
                   <p className="text-sm">
-                    At PlayStudy.AI, {"we're"} on a quest to revolutionize learning by turning mundane study sessions into electrifying game experiences. We believe education should spark joy, ignite curiosity, and stick with you—because why just study when you can play?
+                    At PlayStudy.AI, we are on a quest to revolutionize learning by turning mundane study sessions into electrifying game experiences. We believe education should spark joy, ignite curiosity, and stick with you—because why just study when you can play?
                   </p>
                 </div>
 
@@ -582,7 +532,7 @@ export default function Page() {
                     Policy and Conduct
                   </h3>
                   <p className="text-sm">
-                    {"We're"} committed to creating a fun, fair, and respectful community. Our policies ensure a safe space for all players—{"cheating's"} out, {"creativity's"} in. Check out our full guidelines for the rules of the game.
+                    We are committed to creating a fun, fair, and respectful community. Our policies ensure a safe space for all players—cheating is out, creativity is in. Check out our full guidelines for the rules of the game.
                   </p>
                   <Link href="/policy" className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block transition-colors">
                     Read More
@@ -595,7 +545,7 @@ export default function Page() {
                     Learn About Refund
                   </h3>
                   <p className="text-sm">
-                    Changed your mind? {"We've"} got you covered with a straightforward refund process. Dive into the details to see how we keep things hassle-free and player-friendly.
+                    Changed your mind? We have got you covered with a straightforward refund process. Dive into the details to see how we keep things hassle-free and player-friendly.
                   </p>
                   <Link href="/refunds" className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block transition-colors">
                     Learn More

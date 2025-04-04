@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell, PieChart, Pie, Sector, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
-import { Trophy, Clock, Brain, Star, Calendar, Badge, TrendingUp, Gamepad, Target, Award, BookOpen, BarChart2, Activity, AlertTriangle, ChevronRight, ArrowUp, ArrowDown, Info } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
+import { Trophy, Clock, Brain, Star, Calendar, Badge, Gamepad, Target, Award, BookOpen, Activity, AlertTriangle, ChevronRight, ArrowUp, Info } from "lucide-react";
 
 // Sample performance data for demonstration
 const performanceData = [
@@ -113,13 +113,14 @@ export default function EnhancedPerformance() {
     .filter(a => a.progress / a.total >= 0.7 && a.progress / a.total < 1)
     .sort((a, b) => (b.progress / b.total) - (a.progress / a.total));
 
-  // Identify weakest subject
-  const weakestSubject = [...subjectPerformance].sort((a, b) => a.score - b.score)[0];
-
   // Custom tooltip for charts
   interface CustomTooltipProps {
     active?: boolean;
-    payload?: Array<any>;
+    payload?: Array<{
+      name: string;
+      value: number;
+      color: string;
+    }>;
     label?: string;
   }
   

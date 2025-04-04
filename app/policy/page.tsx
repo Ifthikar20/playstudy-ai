@@ -52,14 +52,14 @@ export default function PolicyPage() {
           <h2 className="text-2xl font-bold text-purple-400 mb-4">User Information Management</h2>
           <p className="text-gray-300 mb-4">
             The personal information we require is strictly what you provide at enrollment. We recognize the 
-            uniqueness of each user's data and maintain it separately. Users are presented with the chance to 
+            uniqueness of each user&apos;s data and maintain it separately. Users are presented with the chance to 
             review their information before utilizing our services and retain the ability to access this data 
             through the service settings at any time.
           </p>
         </div>
 
         <div className="bg-gray-800/80 p-6 rounded-xl shadow-lg border border-purple-500/20 mb-8">
-          <h2 className="text-2xl font-bold text-purple-400 mb-4">What Constitutes "Personal Information"?</h2>
+          <h2 className="text-2xl font-bold text-purple-400 mb-4">What Constitutes &quot;Personal Information&quot;?</h2>
           <p className="text-gray-300 mb-4">
             Personal Information pertains to details that can lead to your identification, such as:
           </p>
@@ -97,18 +97,18 @@ export default function PolicyPage() {
         <div className="bg-gray-800/80 p-6 rounded-xl shadow-lg border border-purple-500/20">
           <h2 className="text-2xl font-bold text-purple-400 mb-4">Cookies and Other Technologies</h2>
           <p className="text-gray-300 mb-4">
-            PlayStudy.AI's digital ecosystem—spanning our website, online services, and interactive applications—eschews 
-            third-party "cookies" and similar tracking technologies, like web beacons. However, to enhance functionality 
+            PlayStudy.AI&apos;s digital ecosystem—spanning our website, online services, and interactive applications—eschews 
+            third-party &quot;cookies&quot; and similar tracking technologies, like web beacons. However, to enhance functionality 
             and user experience, we may employ the following:
           </p>
           <ul className="list-disc ml-6 text-gray-300 space-y-2">
-            <li><span className="font-semibold">Communications Cookies:</span> These facilitate the flow of data across PlayStudy.AI's network, aiding in the detection and correction of errors.</li>
-            <li><span className="font-semibold">Essential Cookies:</span> Deployed to deliver specific features or services you've requested, they're crucial for the proper presentation and functioning of our sites.</li>
+            <li><span className="font-semibold">Communications Cookies:</span> These facilitate the flow of data across PlayStudy.AI&apos;s network, aiding in the detection and correction of errors.</li>
+            <li><span className="font-semibold">Essential Cookies:</span> Deployed to deliver specific features or services you&apos;ve requested, they&apos;re crucial for the proper presentation and functioning of our sites.</li>
             <li><span className="font-semibold">Analytical Cookies:</span> Implemented to gain insights into how visitors engage with our services, helping us evaluate and refine their effectiveness.</li>
           </ul>
           <p className="text-gray-300 mt-4">
             Opting Out: Should you wish to opt out of cookie usage, PlayStudy.AI provides the option to disable cookies 
-            through your browser's privacy settings by selecting "Block all cookies". Be aware that disabling cookies may 
+            through your browser&apos;s privacy settings by selecting &quot;Block all cookies&quot;. Be aware that disabling cookies may 
             impact your ability to use certain aspects of the PlayStudy.AI website.
           </p>
         </div>

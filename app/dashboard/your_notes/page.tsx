@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Plus, Search, FileText, Trash2, Edit3, Play, Star, Filter, Grid, List, X, Save } from "lucide-react";
-import Link from "next/link";
 import GameModal from "@/app/dashboard/_components/GameModal";
 import Hangman from "@/app/dashboard/_components/Games/HangmanGame";
 
