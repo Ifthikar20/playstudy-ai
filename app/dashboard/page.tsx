@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from 'next/dynamic';
+import { getUserProfile } from '@/lib/api-client';
 import Image from "next/image";
 import { Brain, Gamepad, Book, FileText, PenLine, Upload, ArrowRight } from "lucide-react";
 import GameModal from "@/app/dashboard/_components/GameModal";
@@ -172,20 +173,37 @@ export default function Dashboard() {
 
   const fetchSession = useCallback(async () => {
     try {
-      const response = await fetch("/api/auth/session", { cache: "no-store" });
-      if (!response.ok) throw new Error("Session fetch failed");
-      const data = await response.json();
-      if (data.user) {
-        setUser(data.user);
-      } else {
+      const profile = await getUserProfile();
+      console.log("Fetched user from backend:", profile);
+      setUser({
+        name: profile.name ?? null,
+        email: profile.email,
+        image: profile.image ?? null,
+      });
+    } catch (err) {
+      console.warn("Backend fetch failed, falling back to Clerk session");
+  
+      try {
+        const response = await fetch("/api/auth/session", { cache: "no-store" });
+        if (!response.ok) throw new Error("Session fetch failed");
+        const data = await response.json();
+        if (data.user) {
+          setUser({
+            name: data.user.name ?? null,
+            email: data.user.email,
+            image: data.user.image ?? null,
+          });
+        } else {
+          router.push("/signin");
+        }
+      } catch (error) {
+        console.error("Clerk session fallback failed:", error);
         router.push("/signin");
       }
-    } catch (error) {
-      console.error("Failed to fetch session:", error);
-      router.push("/signin");
     }
   }, [router]);
-
+  
+  
   // Add this useEffect to call fetchSession when component mounts
   useEffect(() => {
     fetchSession();
@@ -213,6 +231,8 @@ export default function Dashboard() {
       window.removeEventListener("launchCrossWord", handleLaunchCrossWord as EventListener); // Added cleanup
     };
   }, []);
+
+
 
   const handleGameClick = useCallback((gameTitle: string) => {
     setSelectedGame(gameTitle);
