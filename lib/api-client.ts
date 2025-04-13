@@ -37,3 +37,39 @@ export async function getUserProfile(): Promise<{
 }> {
   return fetchFromBackend('users/me');
 }
+
+
+
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+}
+
+// CRUD Functions for Notes
+
+export async function getUserNotes(): Promise<Note[]> {
+  return fetchFromBackend('notes');
+}
+
+export async function createNote(title: string, content: string): Promise<Note> {
+  return fetchFromBackend('notes', {
+    method: 'POST',
+    body: JSON.stringify({ title, content }),
+  });
+}
+
+export async function updateNote(id: string, title: string, content: string): Promise<Note> {
+  return fetchFromBackend(`notes/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ title, content }),
+  });
+}
+
+export async function deleteNote(id: string): Promise<{ message: string }> {
+  return fetchFromBackend(`notes/${id}`, {
+    method: 'DELETE',
+  });
+}
+
